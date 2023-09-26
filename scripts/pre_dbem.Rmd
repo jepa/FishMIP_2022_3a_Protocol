@@ -1,0 +1,261 @@
+---
+title: "pre_dbem_analysis"
+author: "Juliano Palacios"
+date: "25/07/2023"
+output: html_document
+---
+
+```{r}
+library(MyFunctions)
+
+my_lib(
+  c(
+    "sf",
+    "ncdf4",
+    "metR",
+    "tidyverse",
+    "doParallel",
+    "foreach"
+  )
+)
+
+```
+
+
+From Matthias B.
+
+the 0.5° variant is now available as Secondary Input Data at DKRZ under
+
+`/work/bb0820/ISIMIP/ISIMIP3a/SecondaryInputData/climate/ocean/[obs|ctrl]clim/global/monthly/historical/GFDL-MOM6-COBALT2/`
+
+
+
+## Data needed
+
+Translate ISIMIP data to DBEM:
+
+### get data from server
+
+```{r}
+
+# data address
+# /work/bb0820/ISIMIP/ISIMIP3a/SecondaryInputData/climate/ocean/ctrlclim/global/monthly/historical/GFDL-MOM6-COBALT2
+
+# Call data
+# scp -r b381132@levante.dkrz.de:
+
+# Variables needed
+gfdl-mom6-cobalt2_ctrlclim_o2-bot_30arcmin_global_monthly_1961_2010.nc
+gfdl-mom6-cobalt2_ctrlclim_o2-surf_30arcmin_global_monthly_1961_2010.nc
+gfdl-mom6-cobalt2_ctrlclim_ph-bot_30arcmin_global_monthly_1961_2010.nc
+gfdl-mom6-cobalt2_ctrlclim_ph-surf_30arcmin_global_monthly_1961_2010.nc
+gfdl-mom6-cobalt2_ctrlclim_so-bot_30arcmin_global_monthly_1961_2010.nc
+gfdl-mom6-cobalt2_ctrlclim_so-surf_30arcmin_global_monthly_1961_2010.nc
+gfdl-mom6-cobalt2_ctrlclim_tob_30arcmin_global_monthly_1961_2010.nc
+gfdl-mom6-cobalt2_ctrlclim_tos_30arcmin_global_monthly_1961_2010.nc
+gfdl-mom6-cobalt2_ctrlclim_siconc_30arcmin_global_monthly_1961_2010.nc
+gfdl-mom6-cobalt2_ctrlclim_uo_30arcmin_global_monthly_1961_2010.nc
+gfdl-mom6-cobalt2_ctrlclim_vo_30arcmin_global_monthly_1961_2010.nc
+gfdl-mom6-cobalt2_ctrlclim_intppdiat_30arcmin_global_monthly_1961_2010.nc
+gfdl-mom6-cobalt2_ctrlclim_intppdiaz_30arcmin_global_monthly_1961_2010.nc
+gfdl-mom6-cobalt2_ctrlclim_intpppico_30arcmin_global_monthly_1961_2010.nc
+
+```
+
+
+
+```{bash}
+
+
+# Shell loop
+
+#!/bin/bash
+
+# Replace 'your_remote_username' and 'your_remote_server_ip' with the actual username and IP address of the remote server.
+# Replace '/path/to/files/' with the actual path to the directory where the files are located on the remote server.
+# Replace '/path/on/your/computer/' with the local directory where you want to save the transferred files.
+
+files=( "gfdl-mom6-cobalt2_obsclim_ph-bot_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_obsclim_o2-bot_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_obsclim_o2-surf_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_obsclim_ph-bot_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_obsclim_ph-surf_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_obsclim_so-bot_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_obsclim_so-surf_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_obsclim_tob_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_obsclim_tos_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_obsclim_siconc_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_obsclim_uo_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_obsclim_vo_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_obsclim_intppdiat_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_obsclim_intppdiaz_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_obsclim_intpppico_30arcmin_global_monthly_1961_2010.nc")
+
+
+# For ctrlclim data
+#files=("gfdl-mom6-cobalt2_ctrlclim_o2-bot_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_o2-surf_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_ph-bot_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_o2-bot_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_o2-surf_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_ph-bot_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_ph-surf_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_so-bot_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_so-surf_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_tob_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_tos_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_siconc_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_uo_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_vo_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_intppdiat_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_intppdiaz_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_intpppico_30arcmin_global_monthly_1961_2010.nc")
+
+
+# For fishing effort
+files=("effort_histsoc_1841_2010.csv"
+"gridded_industrial_effort_histsoc_1961_2010.csv"
+"gridded_artisanal_effort_histsoc_1961_2010.csv")
+
+scp -r b381132@levante.dkrz.de:/work/bb0820/ISIMIP/ISIMIP3a/InputData/socioeconomic/fishing/histsoc/"$file" ./
+
+for file in "${files[@]}"
+do
+    scp -r b381132@levante.dkrz.de:/work/bb0820/ISIMIP/ISIMIP3a/SecondaryInputData/climate/ocean/obsclim/global/monthly/historical/GFDL-MOM6-COBALT2/"$file" ./
+done
+
+
+#Save the script to a file and make it executable with the following command:
+
+#chmod +x transfer_files.sh
+
+#Then, you can run the script using:
+
+#./transfer_files.sh
+
+
+ #your_remote_username@your_remote_server_ip
+
+#ssh-copy-id b381132@levante.dkrz.de
+```
+
+
+### Transform data to DBEM like
+
+```{r}
+
+# Set path for data
+data_path <- my_path("G","Climate/cimip6/COBALT2")
+
+# List files
+
+climate_data <- list.files(data_path,full.names = T)
+
+```
+
+## Get DBEM grid on data
+
+
+```{r}
+
+grid_dbem <- function(shapefile, dbem_grid, out = "df"){
+
+  dbem_grid <- sf::st_as_sf(dbem_grid,
+                            coords = c("lon","lat"),
+                            crs = 4326)
+
+  # if supplied a grid will rasterize
+  if(inherits(shapefile, "sf")== FALSE){
+
+    shapefile <- sf::st_as_sf(shapefile,
+                              coords = c("lon","lat"),
+                              crs = 4326) 
+  }else{
+
+    # Make sure shapefile is in the same coordinate system
+    shapefile <- shapefile %>%
+      st_set_crs(4326)
+  }
+
+  # Merge both
+  if(out == "sf"){
+    merge_grid <- sf::st_join(dbem_grid,
+                              shapefile,
+                              join = st_intersects)
+  }else{
+    merge_grid <- sf::st_join(dbem_grid,
+                              shapefile,
+                              join = st_intersects) %>%
+      as.data.frame() %>%
+      select(-geometry)
+  }
+  return(merge_grid)
+}
+
+
+
+```
+
+
+```{r}
+# Use one dataset to grid
+
+# Load nc data
+
+shapefile <- ReadNetCDF(climate_data[1]) %>%
+  filter(time == 720) %>%
+  tibble::rowid_to_column() %>% 
+  select(rowid,lon,lat)
+
+
+```
+
+```{r}
+
+variable_list <- data.frame(
+  isimip_name = c("o2-bot", 
+                  "ph-bot",
+                  "so-bot",
+                  "tob",
+                  "siconc",
+                  "o2-surf",
+                  "ph-surf",
+                  "so-surf",
+                  "tos",
+                  "uo",
+                  "vo",
+                  "intppdiat"),
+  dbem_name = c("O2_btm_",
+                "htotal_btm_",
+                "Salinity_btm_",
+                "bot_temp_",
+                "IceExt_",
+                "O2_surf_",
+                "htotal_surf_",
+                "Salinity_surf_",
+                "SST_",
+                "AdvectionU_",
+                "AdvectionV_",
+                "test")
+)
+
+
+
+to_dbem <- function(data,yr,var){
+  
+  x <- data %>% 
+    filter(year == yr) %>%
+    ungroup() %>% 
+    select(variable)
+  
+  
+  name <- paste0(data_path,"to_dbem/COBALT2/",var$dbem_name,yr,".txt")
+  write.table(x, file=name, sep="\t", col.names = F, row.names = F)
+ gc() 
+}
+
+
+
+```
+
+
+
+## Routine
+
+
+```{r}
+i = 13
+
+# for(i in 12:14){
+  
+  data <- ReadNetCDF(climate_data[i]) %>% 
+    rename_with(~ "variable", 4) %>% 
+    left_join(shapefile,
+              by = c("lon","lat")) %>% 
+    mutate(date = ymd_hms("1901-01-01 00:00:00") + months(time),
+           year = year(date)) %>% 
+    group_by(rowid,year,lon,lat) %>% 
+    summarise_at(c("variable"),
+                 mean,
+                 na.rm = T)
+  
+  var <- variable_list %>% 
+    filter(str_detect(climate_data[i],isimip_name))
+  
+  lapply(seq(1961,2010,1), to_dbem, data = data, var = var)
+  
+# }
+
+
+```
+
