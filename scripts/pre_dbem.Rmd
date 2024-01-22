@@ -115,7 +115,7 @@ done
 ```{r}
 
 # Set path for data
-data_path <- my_path("G","Climate/cimip6/COBALT2")
+data_path <- my_path("G","Climate/cimip6/COBALT2/ctrlclim")
 
 # List files
 
@@ -172,10 +172,13 @@ grid_dbem <- function(shapefile, dbem_grid, out = "df"){
 
 # Load nc data
 
-shapefile <- ReadNetCDF(climate_data[1]) %>%
+cobalt_grid <- ReadNetCDF(climate_data[1]) %>%
   filter(time == 720) %>%
   tibble::rowid_to_column() %>% 
   select(rowid,lon,lat)
+
+
+test <- grid_dbem(cobalt_grid,dbem_coords)
 
 
 ```
@@ -211,7 +214,7 @@ variable_list <- data.frame(
 
 
 
-to_dbem <- function(data,yr,var){
+to_dbem <- function(data,yr,var,forcing){
   
   x <- data %>% 
     filter(year == yr) %>%
@@ -219,7 +222,7 @@ to_dbem <- function(data,yr,var){
     select(variable)
   
   
-  name <- paste0(data_path,"to_dbem/COBALT2/",var$dbem_name,yr,".txt")
+  name <- paste0(data_path,"to_dbem/COBALT2/",forcing,"/",var$dbem_name,yr,".txt")
   write.table(x, file=name, sep="\t", col.names = F, row.names = F)
  gc() 
 }
@@ -252,9 +255,185 @@ i = 13
   var <- variable_list %>% 
     filter(str_detect(climate_data[i],isimip_name))
   
-  lapply(seq(1961,2010,1), to_dbem, data = data, var = var)
+  lapply(seq(1961,2010,1), to_dbem, data = data, var = var, forcing = ctrlclim)
   
 # }
+
+
+
+```
+
+# test outputs
+
+```{r}
+
+dbem_coords <- my_data("dbem_coords")
+
+files <- list.files("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/ctrlclim",pattern = "Adve",full.names = T)
+
+suppressMessages(
+clim_data <- bind_cols(
+  lapply(files, read_csv, col_names = F)
+  )
+)
+
+colnames(clim_data) <- seq(1961,2010,1)
+
+clim_data %>% 
+  bind_cols(dbem_coords) %>% 
+  select(lat,lon,index,`2000`) %>% 
+  # View()
+  ggplot() +
+  geom_tile(
+    aes(
+      x = lon,
+      y = lat,
+      fill = `2000`
+    )
+  )
+
+```
+
+
+
+# Manually extract u data cus is too big 
+
+```{r}
+
+nc <- nc_open(file_path)
+
+# Extract relevant information
+lon <- ncvar_get(nc, "lon")
+lat <- ncvar_get(nc, "lat")
+time <- ncvar_get(nc, "time")
+uo <- ncvar_get(nc, "uo", start = c(1, 1, 1, 1), count = c(-1, -1, 1, -1))  # Extract only the first Z layer
+
+# Close the NetCDF file
+nc_close(nc)
+
+# Get the time in years
+years <- as.integer(time / 12) + 1901
+
+# Create a data frame
+df <- expand.grid(
+  Longitude = lon,
+  Latitude = lat,
+  Year = years
+)
+
+# Add the Sea Water X Velocity data
+df$Velocity <- as.vector(uo)
+
+# Print the resulting data frame
+print(df)
+
+
+df %>% 
+  filter(Year == 2000) %>% 
+  group_by(Longitude,Latitude) %>% 
+  summarise(mean = mean(Velocity, na.rm = T)) %>% 
+  ggplot() +
+  geom_tile(
+    aes(
+      x = Longitude,
+      y = Latitude,
+      fill = mean
+    )
+  )
+```
+
+
+
+
+# Old code
+
+### Testing COBALT and GFDL85
+
+U is giving me a lot of trouble, how different is V? Can I just substitute it? No, you can't. They are very different.
+
+
+
+```{r}
+
+gfdl_path <- list.files(my_path("G",extra_path = "Climate/cimip6/C6GFDL85/"),pattern = "U", full.names = T)
+
+gfdl_data <- bind_cols(
+  lapply(gfdl_path, read_csv)
+)
+colnames(gfdl_data) <- seq(1851,2100,1)
+
+gfdl_data %>% 
+  select(`2000`) %>% 
+  filter(`2000` > -100) %>% 
+  rowid_to_column("index") %>%
+  left_join(my_data(data = "dbem_coords")) %>% 
+  # select(lat,lon,`1967`) %>% 
+  ggplot() +
+  geom_tile(
+    aes(
+      x = lon,
+      y = lat,
+      fill = `2000`
+    )
+  )
+
+gfdl_clean <- gfdl_data %>% 
+  gather(year,value,`1961`:`2010`) %>% 
+  select(year,value)
+
+
+cobalt_path <- list.files(my_path("G","Climate/cimip6/COBALT2/to_dbem/ctrlclim/"), pattern = "V", full.names = T)
+
+cobalt_data <- bind_cols(
+  lapply(cobalt_path, read_csv)
+)
+colnames(cobalt_data) <- seq(1961,2010,1)
+
+cobalt_clean <- cobalt_data %>% 
+  gather(year,value,`1961`:`2010`) %>% 
+  select(year,value)
+
+cobalt_data %>% 
+  rowid_to_column("index") %>% 
+  left_join(my_data(data = "dbem_coords")) %>% 
+  select(lat,lon,`1967`) %>% 
+  ggplot() +
+  geom_tile(
+    aes(
+      x = lon,
+      y = lat,
+      fill = `1967`
+    )
+  )
+
+
+# Compare datasets
+
+gfdl_clean %>% 
+  mutate(model = "gfdl") %>% 
+  bind_rows(cobalt_clean %>% mutate(model = "cobalt")) %>% 
+  filter(value> -9000) %>% 
+  group_by(year,model) %>% 
+  summarise(mean = mean(value,na.rm =T),
+            max = max(value,na.rm =T),
+            min = min(value,na.rm =T)
+            ) %>% 
+  gather("var","value",mean:min) %>% 
+  ggplot() +
+  geom_line(
+    aes(
+      x = as.numeric(year),
+      y = value,
+      color = model
+    )
+  ) +
+  facet_wrap(~var,
+             scales = "free")
+
+
+```
+```{r}
+
 
 
 ```
