@@ -22,12 +22,13 @@ my_lib(
 ```
 
 
+# COBALT2 data
+
 From Matthias B.
 
 the 0.5° variant is now available as Secondary Input Data at DKRZ under
 
 `/work/bb0820/ISIMIP/ISIMIP3a/SecondaryInputData/climate/ocean/[obs|ctrl]clim/global/monthly/historical/GFDL-MOM6-COBALT2/`
-
 
 
 ## Data needed
@@ -115,7 +116,7 @@ done
 ```{r}
 
 # Set path for data
-data_path <- my_path("G","Climate/cimip6/COBALT2/ctrlclim")
+data_path <- my_path("G","Climate/cimip6/COBALT2/")
 
 # List files
 
@@ -172,13 +173,10 @@ grid_dbem <- function(shapefile, dbem_grid, out = "df"){
 
 # Load nc data
 
-cobalt_grid <- ReadNetCDF(climate_data[1]) %>%
+shapefile <- ReadNetCDF(climate_data[1]) %>%
   filter(time == 720) %>%
   tibble::rowid_to_column() %>% 
   select(rowid,lon,lat)
-
-
-test <- grid_dbem(cobalt_grid,dbem_coords)
 
 
 ```
@@ -186,30 +184,35 @@ test <- grid_dbem(cobalt_grid,dbem_coords)
 ```{r}
 
 variable_list <- data.frame(
-  isimip_name = c("o2-bot", 
-                  "ph-bot",
-                  "so-bot",
-                  "tob",
-                  "siconc",
-                  "o2-surf",
-                  "ph-surf",
-                  "so-surf",
-                  "tos",
-                  "uo",
-                  "vo",
-                  "intppdiat"),
-  dbem_name = c("O2_btm_",
-                "htotal_btm_",
-                "Salinity_btm_",
-                "bot_temp_",
-                "IceExt_",
-                "O2_surf_",
-                "htotal_surf_",
-                "Salinity_surf_",
-                "SST_",
-                "AdvectionU_",
-                "AdvectionV_",
-                "test")
+  isimip_name = c(
+    "intppdiat",
+    "intppdiaz",
+    "intpppico",
+    "o2-bot", 
+    "ph-bot",
+    "so-bot",
+    "tob",
+    "siconc",
+    "o2-surf",
+    "ph-surf",
+    "so-surf",
+    "tos",
+    "vo"
+  ),
+  dbem_name = c(
+    "diat_",
+    "diaz_",
+    "pico_",
+    "O2_btm_",
+    "htotal_btm_",
+    "Salinity_btm_",
+    "bot_temp_",
+    "IceExt_",
+    "O2_surf_",
+    "htotal_surf_",
+    "Salinity_surf_",
+    "SST_",
+    "AdvectionV_")
 )
 
 
@@ -222,7 +225,7 @@ to_dbem <- function(data,yr,var,forcing){
     select(variable)
   
   
-  name <- paste0(data_path,"to_dbem/COBALT2/",forcing,"/",var$dbem_name,yr,".txt")
+  name <- paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/",forcing,"/",var$dbem_name,yr,".txt")
   write.table(x, file=name, sep="\t", col.names = F, row.names = F)
  gc() 
 }
@@ -237,10 +240,12 @@ to_dbem <- function(data,yr,var,forcing){
 
 
 ```{r}
-i = 13
 
-# for(i in 12:14){
+
+for(i in 1:2){
+  print(i)
   
+  suppressWarnings(
   data <- ReadNetCDF(climate_data[i]) %>% 
     rename_with(~ "variable", 4) %>% 
     left_join(shapefile,
@@ -250,55 +255,100 @@ i = 13
     group_by(rowid,year,lon,lat) %>% 
     summarise_at(c("variable"),
                  mean,
-                 na.rm = T)
+                 na.rm = T) %>% 
+    mutate(variable = ifelse(is.na(variable), -9999, variable))
+  )
+
   
   var <- variable_list %>% 
     filter(str_detect(climate_data[i],isimip_name))
   
-  lapply(seq(1961,2010,1), to_dbem, data = data, var = var, forcing = ctrlclim)
+  mclapply(seq(1961,2010,1), to_dbem, data = data, var = var, forcing = "ctrlclim")
   
-# }
+}
 
 
 
 ```
 
-# test outputs
+## test outputs
+
+They all look good
 
 ```{r}
 
 dbem_coords <- my_data("dbem_coords")
 
-files <- list.files("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/ctrlclim",pattern = "Adve",full.names = T)
+files <- list.files("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/ctrlclim",pattern = "SST",full.names = T)
 
 suppressMessages(
-clim_data <- bind_cols(
-  lapply(files, read_csv, col_names = F)
+  clim_data <- bind_cols(
+    lapply(files, read_csv, col_names = F)
   )
 )
 
 colnames(clim_data) <- seq(1961,2010,1)
 
-clim_data %>% 
-  bind_cols(dbem_coords) %>% 
-  select(lat,lon,index,`2000`) %>% 
-  # View()
-  ggplot() +
-  geom_tile(
-    aes(
-      x = lon,
-      y = lat,
-      fill = `2000`
+
+gridExtra::grid.arrange(
+  clim_data %>% 
+    bind_cols(dbem_coords) %>% 
+    select(lat,lon,index,`2000`) %>% 
+    filter(`2000` > -100) %>% 
+    # View()
+    ggplot() +
+    geom_tile(
+      aes(
+        x = lon,
+        y = lat,
+        fill = `2000`
+      )
+    ),
+  clim_data %>% 
+    bind_cols(dbem_coords) %>% 
+    gather("year","value",`1961`:`2010`) %>% 
+    filter(value > -100) %>% 
+    group_by(year) %>% 
+    summarise(mean_v = mean(value,na.rm=T)
+    ) %>% 
+    ggplot() +
+    geom_line(
+      aes(
+        x = as.numeric(year),
+        y = mean_v
+      )
     )
-  )
+)
+
+```
+
+## Fix -9999
+
+Forgot to transform NAs to -9999
+
+```{r}
+
+
+dbem_files <- list.files("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/ctrlclim",full.names = T)
+
+
+for(i in 200:length(dbem_files)){
+  
+  correct <- read.table(dbem_files[i]) %>% 
+    mutate(V1 = ifelse(is.na(V1), -9999, V1))
+  
+  write.table(correct, file=dbem_files[i], sep="\t", col.names = F, row.names = F)
+}
 
 ```
 
 
 
-# Manually extract u data cus is too big 
+## Manually extract u data cus is too big 
 
 ```{r}
+
+file_path <- list.files("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/ctrlclim",pattern = "uo",full.names = T)
 
 nc <- nc_open(file_path)
 
@@ -316,10 +366,13 @@ years <- as.integer(time / 12) + 1901
 
 # Create a data frame
 df <- expand.grid(
-  Longitude = lon,
-  Latitude = lat,
-  Year = years
-)
+  lon = lon,
+  lat = lat,
+  years = years
+) %>% 
+  left_join(shapefile,
+              by = c("lon","lat")) %>% 
+  left_join(dbem_coords)
 
 # Add the Sea Water X Velocity data
 df$Velocity <- as.vector(uo)
@@ -328,19 +381,59 @@ df$Velocity <- as.vector(uo)
 print(df)
 
 
-df %>% 
-  filter(Year == 2000) %>% 
-  group_by(Longitude,Latitude) %>% 
-  summarise(mean = mean(Velocity, na.rm = T)) %>% 
+# Visualize data
+df %>%
+  filter(years == 2000) %>%
+  group_by(lon,lat) %>%
+  summarise(mean = mean(Velocity, na.rm = T)) %>%
   ggplot() +
   geom_tile(
     aes(
-      x = Longitude,
-      y = Latitude,
+      x = lon,
+      y = lat,
       fill = mean
     )
   )
+
+
+# Save data for DBEM (Remeber to convert NAs to -9999)
+
+ou_data <- df %>%
+  group_by(year = years,index) %>%
+  summarise(mean = mean(Velocity, na.rm = T)) %>% 
+  mutate(variable = ifelse(is.na(mean), -9999, mean))
+
+
+mclapply(seq(1961,2010,1), to_dbem, data = ou_data, var = "AdvectionU_", forcing = "ctrlclim")
+
+
+to_dbem <- function(data,yr,var,forcing){
+  
+  x <- data %>% 
+    filter(year == yr) %>%
+    ungroup() %>% 
+    select(variable)
+  
+  
+  name <- paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/",forcing,"/",var,yr,".txt")
+  write.table(x, file=name, sep="\t", col.names = F, row.names = F)
+ gc() 
+}
+
 ```
+
+
+# Fishing effort data
+
+```{r}
+
+```
+
+
+
+
+
+
 
 
 
