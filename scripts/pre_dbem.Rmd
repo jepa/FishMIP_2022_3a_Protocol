@@ -422,6 +422,54 @@ to_dbem <- function(data,yr,var,forcing){
 
 ```
 
+## Transform totalphy
+
+
+totalphy2= (intppdiaz+intppsmall+intppico)*0.1 + diatoms
+
+```{r}
+
+# Get data paths
+diat <- list.files("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/ctrlclim", pattern = "diat", full.names = T)
+diaz <- list.files("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/ctrlclim", pattern = "diaz", full.names = T)
+pico <- list.files("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/ctrlclim", pattern = "pico", full.names = T)
+
+for(y in 1:length(diat)){
+  
+  # Read data
+  npp_df <- bind_cols(
+  read.table(diat[y]),
+  read.table(diaz[y]),
+  read.table(pico[y])
+  )
+    colnames(npp_df) <- c("diat","diaz","pico")
+    
+  
+  totalphy_df <- npp_df %>% 
+    mutate(totalphy = (diaz+pico)*0.1+diaz) %>% 
+    mutate(totalphy = ifelse(is.na(totalphy),-9999,totalphy)) %>% 
+    select(totalphy)
+  
+  name <- paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/ctrlclim/","totalphy2",str_sub(diat[y],99,102),".txt")
+  write.table(totalphy_df, file=name, sep="\t", col.names = F, row.names = F)
+  
+}
+
+
+read.table("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/ctrlclim/totalphy22000.txt") %>% 
+  bind_cols(dbem_coords) %>% 
+  filter(V1 > -100) %>% 
+  ggplot() +
+  geom_tile(
+    aes(
+      x = lon,
+      y = lat,
+      fill = V1
+    )
+  )
+
+```
+
 
 # Fishing effort data
 
