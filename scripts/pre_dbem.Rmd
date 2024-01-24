@@ -248,9 +248,9 @@ to_dbem <- function(data,yr,var,forcing){
 ```{r}
 
 
-# for(i in 1:13){
+# for(i in 1:14){
 for(i in c(7,10,12)){
-  # i = 5
+  # i = 14
   print(climate_data[i])
   
   suppressWarnings(
@@ -357,7 +357,7 @@ for(i in 200:length(dbem_files)){
 
 forcing <- "obsclim"
 
-file_path <- list.files(paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/",forcing,pattern = "uo",full.names = T))
+file_path <- list.files(paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/",forcing),pattern = "vo",full.names = T)
 
 nc <- nc_open(file_path)
 
@@ -365,7 +365,7 @@ nc <- nc_open(file_path)
 lon <- ncvar_get(nc, "lon")
 lat <- ncvar_get(nc, "lat")
 time <- ncvar_get(nc, "time")
-uo <- ncvar_get(nc, "uo", start = c(1, 1, 1, 1), count = c(-1, -1, 1, -1))  # Extract only the first Z layer
+uo <- ncvar_get(nc, "vo", start = c(1, 1, 1, 1), count = c(-1, -1, 1, -1))  # Extract only the first Z layer
 
 # Close the NetCDF file
 nc_close(nc)
@@ -427,7 +427,7 @@ to_dbem <- function(data,yr,var,forcing){
 }
 
 
-mclapply(seq(1961,2010,1), to_dbem, data = ou_data, var = "AdvectionU_", forcing = forcing)
+mclapply(seq(1961,2010,1), to_dbem, data = ou_data, var = "AdvectionV_", forcing = forcing)
 
 ```
 
@@ -438,10 +438,12 @@ totalphy2= (intppdiaz+intppsmall+intppico)*0.1 + diatoms
 
 ```{r}
 
+forcing <- "obsclim"
+
 # Get data paths
-diat <- list.files("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/ctrlclim", pattern = "diat", full.names = T)
-diaz <- list.files("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/ctrlclim", pattern = "diaz", full.names = T)
-pico <- list.files("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/ctrlclim", pattern = "pico", full.names = T)
+diat <- list.files(paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/",forcing), pattern = "diat", full.names = T)
+diaz <- list.files(paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/",forcing), pattern = "diaz", full.names = T)
+pico <- list.files(paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/",forcing), pattern = "pico", full.names = T)
 
 for(y in 1:length(diat)){
   
@@ -459,13 +461,13 @@ for(y in 1:length(diat)){
     mutate(totalphy = ifelse(is.na(totalphy),-9999,totalphy)) %>% 
     select(totalphy)
   
-  name <- paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/ctrlclim/","totalphy2",str_sub(diat[y],99,102),".txt")
+  name <- paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/",forcing,"/totalphy2",str_sub(diat[y],98,101),".txt")
   write.table(totalphy_df, file=name, sep="\t", col.names = F, row.names = F)
   
 }
 
 
-read.table("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/ctrlclim/totalphy22000.txt") %>% 
+read.table(paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/",forcing,"/Advectionv_1961.txt")) %>% 
   bind_cols(dbem_coords) %>% 
   filter(V1 > -100) %>% 
   ggplot() +
