@@ -354,7 +354,10 @@ for(i in 200:length(dbem_files)){
 
 ```{r}
 
-file_path <- list.files("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/ctrlclim",pattern = "uo",full.names = T)
+
+forcing <- "obsclim"
+
+file_path <- list.files(paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/",forcing,pattern = "uo",full.names = T))
 
 nc <- nc_open(file_path)
 
@@ -410,9 +413,6 @@ ou_data <- df %>%
   mutate(variable = ifelse(is.na(mean), -9999, mean))
 
 
-mclapply(seq(1961,2010,1), to_dbem, data = ou_data, var = "AdvectionU_", forcing = "ctrlclim")
-
-
 to_dbem <- function(data,yr,var,forcing){
   
   x <- data %>% 
@@ -425,6 +425,9 @@ to_dbem <- function(data,yr,var,forcing){
   write.table(x, file=name, sep="\t", col.names = F, row.names = F)
  gc() 
 }
+
+
+mclapply(seq(1961,2010,1), to_dbem, data = ou_data, var = "AdvectionU_", forcing = forcing)
 
 ```
 
