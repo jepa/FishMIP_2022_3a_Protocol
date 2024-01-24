@@ -83,6 +83,8 @@ files=( "gfdl-mom6-cobalt2_obsclim_ph-bot_30arcmin_global_monthly_1961_2010.nc" 
 #files=("gfdl-mom6-cobalt2_ctrlclim_o2-bot_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_o2-surf_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_ph-bot_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_o2-bot_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_o2-surf_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_ph-bot_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_ph-surf_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_so-bot_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_so-surf_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_tob_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_tos_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_siconc_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_uo_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_vo_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_intppdiat_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_intppdiaz_30arcmin_global_monthly_1961_2010.nc" "gfdl-mom6-cobalt2_ctrlclim_intpppico_30arcmin_global_monthly_1961_2010.nc")
 
 
+
+
 # For fishing effort
 files=("effort_histsoc_1841_2010.csv"
 "gridded_industrial_effort_histsoc_1961_2010.csv"
@@ -93,8 +95,11 @@ scp -r b381132@levante.dkrz.de:/work/bb0820/ISIMIP/ISIMIP3a/InputData/socioecono
 for file in "${files[@]}"
 do
     scp -r b381132@levante.dkrz.de:/work/bb0820/ISIMIP/ISIMIP3a/SecondaryInputData/climate/ocean/obsclim/global/monthly/historical/GFDL-MOM6-COBALT2/"$file" ./
+    
 done
 
+
+scp -r b381132@levante.dkrz.de:/work/bb0820/ISIMIP/ISIMIP3a/InputData/climate/ocean/obsclim/global/monthly/historical/GFDL-MOM6-COBALT2/"$file" ./
 
 #Save the script to a file and make it executable with the following command:
 
@@ -108,6 +113,7 @@ done
  #your_remote_username@your_remote_server_ip
 
 #ssh-copy-id b381132@levante.dkrz.de
+
 ```
 
 
@@ -116,7 +122,7 @@ done
 ```{r}
 
 # Set path for data
-data_path <- my_path("G","Climate/cimip6/COBALT2/")
+data_path <- my_path("G","Climate/cimip6/COBALT2/obsclim")
 
 # List files
 
@@ -242,28 +248,30 @@ to_dbem <- function(data,yr,var,forcing){
 ```{r}
 
 
-for(i in 1:2){
-  print(i)
+# for(i in 1:13){
+for(i in c(7,10,12)){
+  # i = 5
+  print(climate_data[i])
   
   suppressWarnings(
-  data <- ReadNetCDF(climate_data[i]) %>% 
-    rename_with(~ "variable", 4) %>% 
-    left_join(shapefile,
-              by = c("lon","lat")) %>% 
-    mutate(date = ymd_hms("1901-01-01 00:00:00") + months(time),
-           year = year(date)) %>% 
-    group_by(rowid,year,lon,lat) %>% 
-    summarise_at(c("variable"),
-                 mean,
-                 na.rm = T) %>% 
-    mutate(variable = ifelse(is.na(variable), -9999, variable))
+    data <- ReadNetCDF(climate_data[i]) %>% 
+      rename_with(~ "variable", 5) %>% # change to 5 for i = 5,7,10,12 due to data inconsistency
+      left_join(shapefile,
+                by = c("lon","lat")) %>% 
+      mutate(date = ymd_hms("1901-01-01 00:00:00") + months(time),
+             year = year(date)) %>% 
+      group_by(rowid,year,lon,lat) %>% 
+      summarise_at(c("variable"),
+                   mean,
+                   na.rm = T) %>% 
+      mutate(variable = ifelse(is.na(variable), -9999, variable))
   )
-
+  
   
   var <- variable_list %>% 
     filter(str_detect(climate_data[i],isimip_name))
   
-  mclapply(seq(1961,2010,1), to_dbem, data = data, var = var, forcing = "ctrlclim")
+  mclapply(seq(1961,2010,1), to_dbem, data = data, var = var, forcing = "obsclim")
   
 }
 
@@ -341,8 +349,6 @@ for(i in 200:length(dbem_files)){
 }
 
 ```
-
-
 
 ## Manually extract u data cus is too big 
 
@@ -469,22 +475,6 @@ read.table("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_d
   )
 
 ```
-
-
-# Fishing effort data
-
-```{r}
-
-```
-
-
-
-
-
-
-
-
-
 
 # Old code
 
