@@ -121,11 +121,12 @@ scp -r b381132@levante.dkrz.de:/work/bb0820/ISIMIP/ISIMIP3a/InputData/climate/oc
 
 ```{r}
 
+forcing <- "ctrlclim"
+
 # Set path for data
-data_path <- my_path("G","Climate/cimip6/COBALT2/obsclim")
+data_path <- my_path("G","Climate/cimip6/COBALT2/",forcing)
 
 # List files
-
 climate_data <- list.files(data_path,full.names = T)
 
 ```
@@ -191,34 +192,35 @@ shapefile <- ReadNetCDF(climate_data[1]) %>%
 
 variable_list <- data.frame(
   isimip_name = c(
-    "intppdiat",
-    "intppdiaz",
-    "intpppico",
-    "o2-bot", 
-    "ph-bot",
-    "so-bot",
-    "tob",
-    "siconc",
-    "o2-surf",
-    "ph-surf",
-    "so-surf",
-    "tos",
-    "vo"
+    # "intppdiat",
+    # "intppdiaz",
+    # "intpppico",
+    # "o2-bot", 
+    # "ph-bot",
+    # "so-bot",
+    # "tob",
+    # "siconc",
+    "o2-surf"#,
+    # "ph-surf",
+    # "so-surf",
+    # "tos"#,
+    # "vo"
   ),
   dbem_name = c(
-    "diat_",
-    "diaz_",
-    "pico_",
-    "O2_btm_",
-    "htotal_btm_",
-    "Salinity_btm_",
-    "bot_temp_",
-    "IceExt_",
-    "O2_surf_",
-    "htotal_surf_",
-    "Salinity_surf_",
-    "SST_",
-    "AdvectionV_")
+    # "diat_",
+    # "diaz_",
+    # "pico_",
+    # "O2_btm_",
+    # "htotal_btm_",
+    # "Salinity_btm_",
+    # "bot_temp_",
+    # "IceExt_",
+    "O2_surf_"#,
+    # "htotal_surf_",
+    # "Salinity_surf_",
+    # "SST_"#,
+    # "AdvectionV_"
+    )
 )
 
 
@@ -240,22 +242,29 @@ to_dbem <- function(data,yr,var,forcing){
 
 ```
 
-
-
 ## Routine
-
 
 ```{r}
 
 
-# for(i in 1:14){
-for(i in c(7,10,12)){
-  # i = 14
-  print(climate_data[i])
+
+# for(i in 1:nrow(variable_list)){
+  
+  for(i in 1){
+  
+  # change to 5 for i = 5,7,10,12 due to data inconsistency (NOT TESTED)
+  if(i %in% c(5,7,10,12)){
+    n_var = 5
+  }else{
+    n_var = 4
+  }
+  
+  climate_data <- list.files(data_path,full.names = T, pattern = variable_list$isimip_name[i])
   
   suppressWarnings(
-    data <- ReadNetCDF(climate_data[i]) %>% 
-      rename_with(~ "variable", 5) %>% # change to 5 for i = 5,7,10,12 due to data inconsistency
+    data <- ReadNetCDF(climate_data) %>% 
+      rename_with(~ "variable", n_var) %>% # change to 5 for i = 5,7,10,12 due to data inconsistency
+      # rename_with(~ "variable", 4) %>% # change to 5 for i = 5,7,10,12 due to data inconsistency
       left_join(shapefile,
                 by = c("lon","lat")) %>% 
       mutate(date = ymd_hms("1901-01-01 00:00:00") + months(time),
@@ -269,17 +278,18 @@ for(i in c(7,10,12)){
   
   
   var <- variable_list %>% 
-    filter(str_detect(climate_data[i],isimip_name))
+    filter(str_detect(climate_data,isimip_name))
   
-  mclapply(seq(1961,2010,1), to_dbem, data = data, var = var, forcing = "obsclim")
+  mclapply(seq(1961,2010,1), to_dbem, data = data, var = var, forcing = forcing)
   
 }
 
 
 
+
 ```
 
-## test outputs
+## Test outputs
 
 They all look good
 
@@ -287,7 +297,7 @@ They all look good
 
 dbem_coords <- my_data("dbem_coords")
 
-files <- list.files("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/ctrlclim",pattern = "SST",full.names = T)
+files <- list.files(paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/",forcing),pattern = "Salinity_surf_",full.names = T)
 
 suppressMessages(
   clim_data <- bind_cols(
@@ -327,26 +337,6 @@ gridExtra::grid.arrange(
       )
     )
 )
-
-```
-
-## Fix -9999
-
-Forgot to transform NAs to -9999
-
-```{r}
-
-
-dbem_files <- list.files("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/ctrlclim",full.names = T)
-
-
-for(i in 200:length(dbem_files)){
-  
-  correct <- read.table(dbem_files[i]) %>% 
-    mutate(V1 = ifelse(is.na(V1), -9999, V1))
-  
-  write.table(correct, file=dbem_files[i], sep="\t", col.names = F, row.names = F)
-}
 
 ```
 
@@ -438,7 +428,7 @@ totalphy2= (intppdiaz+intppsmall+intppico)*0.1 + diatoms
 
 ```{r}
 
-forcing <- "obsclim"
+forcing <- "ctrlclim"
 
 # Get data paths
 diat <- list.files(paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/",forcing), pattern = "diat", full.names = T)
@@ -461,7 +451,7 @@ for(y in 1:length(diat)){
     mutate(totalphy = ifelse(is.na(totalphy),-9999,totalphy)) %>% 
     select(totalphy)
   
-  name <- paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/",forcing,"/totalphy2",str_sub(diat[y],98,101),".txt")
+  name <- paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/",forcing,"/totalphy2",str_sub(diat[y],99,102),".txt")
   write.table(totalphy_df, file=name, sep="\t", col.names = F, row.names = F)
   
 }
@@ -500,44 +490,53 @@ variable_list <-c(
     "Salinity_surf_",
     "SST_",
     "AdvectionV_",
+    "AdvectionU_",
     "totalphy2"
 )
 
+years <- seq(1961,1980,1)
 
-years <- seq(1961,1970,1)
-
-
-for(i in 1:length(variable_list)){
-  for(y in 1:length(years)){
+for(i in 12:length(variable_list)){
+  
+  var <- variable_list[i]
+  for (cycle in 1:6) {
     
-    var <- variable_list[i]
-    yr <- years[y]
+    start_year <- 1941 - (cycle - 1) * 20
+    end_year <- 1960 - (cycle - 1) * 20
     
-    x <- read.table(paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/ctrlclim/",var,yr,".txt"))
+    time_step <- seq(start_year,end_year,1)
     
-    name <- paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/past/",var,yr-10,".txt")
-    
-    write.table(x, file=name, sep="\t", col.names = F, row.names = F)
+    for(y in 1:length(years)){
+      yr <- years[y]
+      
+      x <- read.table(paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/ctrlclim/",var,yr,".txt"))
+      # print(paste(var,yr))
+      
+      name <- paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/past/",var,time_step[y],".txt")
+      # print(name)
+      
+      write.table(x, file=name, sep="\t", col.names = F, row.names = F)
+    }
     
   }
 }
-
+  
 ```
 
 ## Test sequence
 
 ```{r}
 
-test_files <- list.files("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/test/",full.names = T)
+test_files <- list.files("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/past/",full.names = T)
 
 test_df <- bind_cols(
   lapply(X = test_files,FUN = read.csv, header = F)
 ) 
-colnames(test_df) <- seq(1951,2010,1)
+colnames(test_df) <- seq(1841,2010,1)
 
 test_df %>% 
   bind_cols(dbem_coords) %>% 
-  gather("year","value",`1951`:`2010`) %>% 
+  gather("year","value",`1841`:`2010`) %>% 
   filter(value > -100) %>% 
   group_by(year) %>% 
   summarise(mean = mean(value, na.rm = T)) %>% 
@@ -639,9 +638,23 @@ gfdl_clean %>%
 
 
 ```
+
+## Fix -9999
+
+Forgot to transform NAs to -9999
+
 ```{r}
 
 
+dbem_files <- list.files(paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/",forcing),full.names = T)
+
+
+for(i in 200:length(dbem_files)){
+  
+  correct <- read.table(dbem_files[i]) %>% 
+    mutate(V1 = ifelse(is.na(V1), -9999, V1))
+  
+  write.table(correct, file=dbem_files[i], sep="\t", col.names = F, row.names = F)
+}
 
 ```
-
