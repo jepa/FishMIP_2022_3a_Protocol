@@ -94,8 +94,8 @@ scp -r b381132@levante.dkrz.de:/work/bb0820/ISIMIP/ISIMIP3a/InputData/socioecono
 
 for file in "${files[@]}"
 do
-    scp -r b381132@levante.dkrz.de:/work/bb0820/ISIMIP/ISIMIP3a/SecondaryInputData/climate/ocean/obsclim/global/monthly/historical/GFDL-MOM6-COBALT2/"$file" ./
-    
+scp -r b381132@levante.dkrz.de:/work/bb0820/ISIMIP/ISIMIP3a/SecondaryInputData/climate/ocean/obsclim/global/monthly/historical/GFDL-MOM6-COBALT2/"$file" ./
+
 done
 
 
@@ -110,7 +110,7 @@ scp -r b381132@levante.dkrz.de:/work/bb0820/ISIMIP/ISIMIP3a/InputData/climate/oc
 #./transfer_files.sh
 
 
- #your_remote_username@your_remote_server_ip
+#your_remote_username@your_remote_server_ip
 
 #ssh-copy-id b381132@levante.dkrz.de
 
@@ -137,24 +137,24 @@ climate_data <- list.files(data_path,full.names = T)
 ```{r}
 
 grid_dbem <- function(shapefile, dbem_grid, out = "df"){
-
+  
   dbem_grid <- sf::st_as_sf(dbem_grid,
                             coords = c("lon","lat"),
                             crs = 4326)
-
+  
   # if supplied a grid will rasterize
   if(inherits(shapefile, "sf")== FALSE){
-
+    
     shapefile <- sf::st_as_sf(shapefile,
                               coords = c("lon","lat"),
                               crs = 4326) 
   }else{
-
+    
     # Make sure shapefile is in the same coordinate system
     shapefile <- shapefile %>%
       st_set_crs(4326)
   }
-
+  
   # Merge both
   if(out == "sf"){
     merge_grid <- sf::st_join(dbem_grid,
@@ -220,7 +220,7 @@ variable_list <- data.frame(
     # "Salinity_surf_",
     # "SST_"#,
     # "AdvectionV_"
-    )
+  )
 )
 
 
@@ -235,7 +235,7 @@ to_dbem <- function(data,yr,var,forcing){
   
   name <- paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/",forcing,"/",var$dbem_name,yr,".txt")
   write.table(x, file=name, sep="\t", col.names = F, row.names = F)
- gc() 
+  gc() 
 }
 
 
@@ -246,11 +246,9 @@ to_dbem <- function(data,yr,var,forcing){
 
 ```{r}
 
-
-
 # for(i in 1:nrow(variable_list)){
-  
-  for(i in 1){
+
+# for(i in 1){
   
   # change to 5 for i = 5,7,10,12 due to data inconsistency (NOT TESTED)
   if(i %in% c(5,7,10,12)){
@@ -370,7 +368,7 @@ df <- expand.grid(
   years = years
 ) %>% 
   left_join(shapefile,
-              by = c("lon","lat")) %>% 
+            by = c("lon","lat")) %>% 
   left_join(dbem_coords)
 
 # Add the Sea Water X Velocity data
@@ -413,7 +411,7 @@ to_dbem <- function(data,yr,var,forcing){
   
   name <- paste0("~/Library/CloudStorage/OneDrive-UBC/Data/Climate/cimip6/COBALT2/to_dbem/",forcing,"/",var,yr,".txt")
   write.table(x, file=name, sep="\t", col.names = F, row.names = F)
- gc() 
+  gc() 
 }
 
 
@@ -439,12 +437,12 @@ for(y in 1:length(diat)){
   
   # Read data
   npp_df <- bind_cols(
-  read.table(diat[y]),
-  read.table(diaz[y]),
-  read.table(pico[y])
+    read.table(diat[y]),
+    read.table(diaz[y]),
+    read.table(pico[y])
   )
-    colnames(npp_df) <- c("diat","diaz","pico")
-    
+  colnames(npp_df) <- c("diat","diaz","pico")
+  
   
   totalphy_df <- npp_df %>% 
     mutate(totalphy = (diaz+pico)*0.1+diaz) %>% 
@@ -480,18 +478,18 @@ So as I understand Repeat 1961-1980 one more time so we get 1951-1961. That mean
 ```{r}
 
 variable_list <-c(
-    "O2_btm_",
-    "htotal_btm_",
-    "Salinity_btm_",
-    "bot_temp_",
-    "IceExt_",
-    "O2_surf_",
-    "htotal_surf_",
-    "Salinity_surf_",
-    "SST_",
-    "AdvectionV_",
-    "AdvectionU_",
-    "totalphy2"
+  "O2_btm_",
+  "htotal_btm_",
+  "Salinity_btm_",
+  "bot_temp_",
+  "IceExt_",
+  "O2_surf_",
+  "htotal_surf_",
+  "Salinity_surf_",
+  "SST_",
+  "AdvectionV_",
+  "AdvectionU_",
+  "totalphy2"
 )
 
 years <- seq(1961,1980,1)
@@ -520,7 +518,7 @@ for(i in 12:length(variable_list)){
     
   }
 }
-  
+
 ```
 
 ## Test sequence
@@ -623,7 +621,7 @@ gfdl_clean %>%
   summarise(mean = mean(value,na.rm =T),
             max = max(value,na.rm =T),
             min = min(value,na.rm =T)
-            ) %>% 
+  ) %>% 
   gather("var","value",mean:min) %>% 
   ggplot() +
   geom_line(
