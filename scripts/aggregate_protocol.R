@@ -35,7 +35,7 @@ aggregate_fx <- function(data_path){
   write_csv(df, "/home/jepa/projects/rrg-wailung/jepa/R/Data/fishmip/aggregated_data.csv")
   
 }
-
+s
 
 # Call species list
 dbem_cords <- read.csv("/home/jepa/projects/rrg-wailung/jepa/R/Data/dbem/Lon_Lat_DBEM.txt", header = T)
