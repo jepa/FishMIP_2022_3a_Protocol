@@ -1,0 +1,172 @@
+---
+title: "test_runs"
+author: "Juliano Palacios Abrantes and William W.L. Cheung"
+date: "2024-01-31"
+output: html_document
+---
+
+
+```{r}
+library(MyFunctions)
+
+my_lib(
+  c(
+    "sf",
+    "ncdf4",
+    "metR",
+    "tidyverse",
+    "doParallel",
+    "foreach"
+  )
+)
+
+```
+
+
+# Test runs
+
+We ran some tests using 10 species with the following configuration:
+
+iIniStartYear=1951, iIniEndYear=1980
+iIniStartYear2=1951,iIniEndYear2=1980
+iSimStartYear=1841,iSimEndYear=2010
+
+
+```{r}
+
+# Load dbem coordenates
+dbem_cords <- my_data("dbem_coords")
+
+# Get DBEM run list
+dbem_files <- list.files(my_path("R", extra_path = "TestRunFishmip"),full.names = T)
+
+# Species list
+spp_list <- my_data("sau_species")
+
+
+```
+
+
+## Routine for lineal data
+
+```{r}
+
+
+# Create function
+
+line_fx <- function(data_path){
+  
+  load(data_path)
+  
+  taxon <- str_sub(data_path,103,108) 
+  
+  x <- as.data.frame(data)
+  colnames(x) <- seq(1841,2010)
+  # rm(data)
+  
+  df <- x %>% 
+    bind_cols(dbem_cords) %>% 
+    gather("year","value",`1841`:`2010`) %>% 
+    group_by(year) %>% 
+    summarise(mean = mean(value,na.rm =T )) %>% 
+    mutate(taxon_key = as.numeric(taxon),
+           year = as.numeric(year)
+           )
+  
+  
+ return(df)
+}
+
+
+# Run function
+final_df <- bind_rows(
+  lapply(dbem_files, line_fx)
+)
+
+
+```
+
+## Plot it
+
+```{r}
+
+final_df %>% 
+  mutate(taxon_key = as.numeric(taxon_key)) %>% 
+  left_join(spp_list) %>% 
+  filter(year >1951) %>% 
+  ggplot() +
+  geom_line(
+    aes(
+      x = as.numeric(year),
+      y = mean
+    )
+  ) +
+  facet_wrap(~common_name,
+             scale = "free") +
+  geom_vline(xintercept = 1960, color = "red")
+```
+
+
+# Aggregate data for all species
+
+```{r}
+
+aggregate_fx <- function(data_path){
+  
+  # Load run
+  load(data_path)
+  # Load results
+  results_df <- my_path("R",name = "aggregated_data.csv", read = T)
+  print(sum(results_df$value))
+  
+  # Transform to DF
+  x <- as.data.frame(data)
+  colnames(x) <- seq(1841,2010)
+  
+  df <- x %>% 
+    bind_cols(dbem_cords) %>% 
+    gather("year","value",`1841`:`2010`) %>% 
+    # mutate(value = 0) # for creating empty df
+    select(index,year,value) %>% 
+    mutate(year = as.numeric(year),
+           value = replace_na(value,0)
+    ) %>% 
+    left_join(results_df,
+              by = c("index","year")
+    ) %>% 
+    mutate(value = value.x + value.y) %>% 
+    select(index,year,value)
+  
+  # Write new df
+  write_csv(df,my_path("R",name = "aggregated_data.csv"))
+  
+}
+
+# Run function
+lapply(dbem_files, aggregate_fx)
+
+```
+
+## Test runs
+
+```{r}
+
+# rm(data,df,results_df)
+
+my_path("R",name = "check_data.csv", read = T)
+
+my_path("R",name = "aggregated_data.csv", read = T) %>% 
+  group_by(year) %>% 
+  summarise(
+    sum_v = sum(value)
+  ) %>% 
+  ggplot() +
+  geom_line(
+    aes(
+    x = year,
+    y = sum_v
+  )
+)
+```
+
+
