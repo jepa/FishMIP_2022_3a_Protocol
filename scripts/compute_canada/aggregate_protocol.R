@@ -34,9 +34,7 @@ if(dir.exists(result_path)==F){
 }
 
 # Species List
-spplist <- read.table("~/projects/rrg-wailung/jepa/R/Data/Species/SppTaxonName.txt") %>% 
-  pull(V1) %>% 
-  unique()
+spplist <- list.files("/home/jepa/scratch/Results/fishmip3af0a/")
 
 # dbem index
 dbem_cords <- read.csv("~/projects/rrg-wailung/jepa/R/Data/dbem/Lon_Lat_DBEM.txt", header = F)
