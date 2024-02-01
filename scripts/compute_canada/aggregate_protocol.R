@@ -42,7 +42,9 @@ dbem_cords <- read.csv("~/projects/rrg-wailung/jepa/R/Data/dbem/Lon_Lat_DBEM.txt
 colnames(dbem_cords) <- c("index","lon","lat")
 
 # List of files to read
-dbem_files <- list.files("~/scratch/Results/R/fishmip3af0/", full.names = T)
+dbem_files <- list.files("~/scratch/Results/R/fishmip3af0a/", #change for testing
+                         full.names = T)
 
 # Run function
-lapply(dbem_files[1:3], aggregate_fx)
+lapply(dbem_files[1:3], #change for testing
+       aggregate_fx)
