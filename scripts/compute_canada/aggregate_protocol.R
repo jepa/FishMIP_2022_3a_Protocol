@@ -45,4 +45,4 @@ colnames(dbem_cords) <- c("index","lon","lat")
 dbem_files <- list.files("/~/scratch/Results/R/fishmip3af0/", full.names = T)
 
 # Run function
-lapply(dbem_files, aggregate_fx)
+lapply(dbem_files[1:3], aggregate_fx)
