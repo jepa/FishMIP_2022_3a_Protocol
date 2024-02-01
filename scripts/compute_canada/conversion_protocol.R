@@ -1,7 +1,7 @@
 # Settings file for converting DBEM
 # .txt files to .Rdata files
 # Juliano Palacios
-library(parallel)
+library(tidyverse)
 
 variables <- c("Abd")
 
@@ -15,12 +15,12 @@ endyr <- 2010
 
 out_path <- "/home/jepa/scratch/Results/R/"
 
-# Call function
-source("~/projects/rrg-wailung/jepa/R/Scripts/dbem_txt_to_rdata.R")
+# Load required functions
+source(here("functions/convert_fx.R")) # Load a bunch of packages
 
 # Call function for scenarios in Settings file
 lapply(variables,
        convert_fx,
-       year_one = 1981,
-       year_end = 2010
+       year_one = 1841,
+       year_end = 1849
 )
