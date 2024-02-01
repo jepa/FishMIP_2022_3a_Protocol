@@ -1,4 +1,4 @@
-library(dplyr)
+library(tidyverse)
 library(data.table)
 
 aggregate_fx <- function(data_path){
@@ -6,12 +6,8 @@ aggregate_fx <- function(data_path){
   # Load run
   load(data_path)
   
-  # Load results
-  # results_df <- my_path("R",name = "aggregated_data.csv", read = T)
-  # print(sum(results_df$value))
-  
   # Load results for CEDAR
-  results_df <- fread("~/projects/rrg-wailung/jepa/R/Data/fishmip/aggregated_data.csv", header = T)
+  results_df <- fread("~/scratch/Results/R/aggregated_data.csv", header = T)
   
   # Transform to DF
   x <- as.data.frame(data)
@@ -32,13 +28,13 @@ aggregate_fx <- function(data_path){
     select(index,year,value)
   
   # Write new df
-  write_csv(df, "~/projects/rrg-wailung/jepa/R/Data/fishmip/aggregated_data.csv")
+  write_csv(df, "~/scratch/Results/R/aggregated_data.csv")
   
 }
 
 
 # Call species list
-dbem_cords <- read.csv("~/projects/rrg-wailung/jepa/R/Data/dbem/Lon_Lat_DBEM.txt", header = T)
+dbem_cords <- read.csv("~/projects/rrg-wailung/jepa/R/Data/dbem/Lon_Lat_DBEM.txt", header = F)
 colnames(dbem_cords) <- c("index","lon","lat")
 
 # List of files to read
