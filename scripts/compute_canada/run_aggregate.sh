@@ -4,7 +4,7 @@
 #SBATCH --nodes=1 # number of node MUST be 1                                    
 #SBATCH --ntasks=4                                                              
 #SBATCH --cpus-per-task=1        # number of processes                          
-#SBATCH --mem=40G                                                                
+#SBATCH --mem=8G                                                                
 #SBATCH -t 00-00:30:00                                                         
 #SBATCH --mail-user=j.palacios@oceans.ubc.ca                                    
 #SBATCH --mail-type=ALL                                                         
