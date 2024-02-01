@@ -3,7 +3,7 @@
 # Juliano Palacios
 library(parallel)
 
-scenarios <- c("fishmip3af0")
+scenarios <- c("fishmip3af0a")
 
 category <- c("Abd")
 
@@ -23,5 +23,5 @@ source("/home/jepa/projects/rrg-wailung/jepa/R/Scripts/dbem_txt_to_rdata.R")
 
 # CAll function for scenaios in Settings file
 for(scen in 1: length(scenarios)){
-  mclapply(spplist$V1, dbem_txt_to_rdata, scenario = scenarios[scen], output_path = out_path)
+  mclapply(spplist$V1[1:10], dbem_txt_to_rdata, scenario = scenarios[scen], output_path = out_path)
 }
