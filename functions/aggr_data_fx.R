@@ -73,6 +73,6 @@ aggr_data <- function(yr,spplist){
          append = TRUE)
   
   
-  print(paste("Completed year",yr))
+  print(paste("Completed year",yr, "with",nrow(save_df),"rows"))
   
 } # Close function
