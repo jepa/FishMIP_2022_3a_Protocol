@@ -1,8 +1,8 @@
 
 # Load required functions
 
-source("../functions/load_libs.fx") # Load a bunch of packages
-source("../functions/aggr_data.fx") # Aggregstes data for FishMip
+source("../../functions/load_libs.fx") # Load a bunch of packages
+source("../../functions/aggr_data.fx") # Aggregstes data for FishMip
 
 # Load packages
 pckgs <- c("tidyverse","data.table","dbemImport","foreach","doParallel")
