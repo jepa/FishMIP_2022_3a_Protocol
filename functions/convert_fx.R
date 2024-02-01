@@ -8,7 +8,7 @@ convert_fx <- function(year_one = 1841,year_end = 2010,var){
   
   # Loop through the years (assuming file names are like "data_1941.csv", "data_1942.csv", etc.)
   for (year in year_one:year_end) {
-    file_path <- paste0(directory_path, "bagg_", year, ".csv")
+    file_path <- paste0(directory_path, "agg_", var,"_",year, ".csv")
     data <- read.csv(file_path,header = F)
     data_list[[year]] <- data
   }
