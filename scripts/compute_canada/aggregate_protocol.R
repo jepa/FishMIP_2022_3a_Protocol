@@ -1,7 +1,9 @@
 
 # Load required functions
-source("/home/jepa/projects/rrg-wailung/jepa/FishMIP_2022_3a_Protocol/functions/load_libs_fx.R") # Load a bunch of packages
-source("/home/jepa/projects/rrg-wailung/jepa/FishMIP_2022_3a_Protocol/functions/aggr_data_fx.R") # Aggregstes data for FishMip
+library(here)
+
+source(here("functions/load_libs_fx.R")) # Load a bunch of packages
+source(here("functions/aggr_data_fx.R")) # Aggregstes data for FishMip
 
 # Load packages
 pckgs <- c("tidyverse","data.table","dbemImport","foreach","doParallel")
