@@ -18,7 +18,7 @@ endyr <- 2010
 out_path <- "/home/jepa/scratch/Results/R/"
 
 # Call function
-source("/home/jepa/projects/rrg-wailung/jepa/R/Scripts/dbem_txt_to_rdata.R")
+source("~/projects/rrg-wailung/jepa/R/Scripts/dbem_txt_to_rdata.R")
 
 
 # CAll function for scenaios in Settings file
