@@ -17,7 +17,7 @@ load_libs(pckgs)
 scen <- "fishmip3af0a"
 
 # Years to load
-yrs <- c(seq(1841,2010))
+yrs <- c(seq(1841,1851))
 
 # Set path to read data from
 dbem_path <- "~/scratch/Results/"
@@ -59,10 +59,10 @@ getDoParWorkers()# you can compare with the number of actual workers
 # ---------------- #
 
 # Run function for one year
-aggr_data(1950,spplist)
+# aggr_data(1950,spplist)
 
 # Run function for all years
-# lapply(yrs, aggr_data, SppList)
+lapply(yrs, aggr_data, spplist)
 
 # Run in parallel
 # foreach(y=1:length(yrs)) %dopar% {aggr_data(yrs[y],spplist)}
