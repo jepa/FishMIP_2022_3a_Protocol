@@ -1,46 +1,67 @@
-library(tidyverse)
-library(data.table)
 
-aggregate_fx <- function(data_path){
-  
-  # Load run
-  load(data_path)
-  
-  # Load results for CEDAR
-  results_df <- fread("~/scratch/Results/R/aggregated_data.csv", header = T)
-  
-  # Transform to DF
-  x <- as.data.frame(data)
-  colnames(x) <- seq(1841,2010)
-  
-  df <- x %>% 
-    bind_cols(dbem_cords) %>% 
-    gather("year","value",`1841`:`2010`) %>% 
-    # mutate(value = 0) # for creating empty df
-    select(index,year,value) %>% 
-    mutate(year = as.numeric(year),
-           value = replace_na(value,0)
-    ) %>% 
-    left_join(results_df,
-              by = c("index","year")
-    ) %>% 
-    mutate(value = value.x + value.y) %>% 
-    select(index,year,value)
-  
-  # Write new df
-  write_csv(df, "~/scratch/Results/R/aggregated_data.csv")
-  
+# Load required functions
+
+source("../functions/load_libs.fx") # Load a bunch of packages
+source("../functions/aggr_data.fx") # Aggregstes data for FishMip
+
+# Load packages
+pckgs <- c("tidyverse","data.table","dbemImport","foreach","doParallel")
+load_libs(pckgs)
+
+# ---------------- #
+# Global Variables 
+# ---------------- #
+
+# Scenario to call (Note this will derermine the results directory)
+scen <- "fishmip3af0a"
+
+# Years to load
+yrs <- c(seq(1841,2010))
+
+# Set path to read data from
+dbem_path <- "~/scratch/Results/"
+# DBEM_Path <- "/Volumes/HALL2000/Data/FishMipMPA/Results" # For testing
+
+# Set a path for saving results
+result_path <- paste("~/scratch/Results/R/",scen,"/",sep = "")
+# Result_Path <- "./Data" # For testing
+
+if(dir.exists(result_path)==F){
+  dir.create(result_path)
+}else{
+  result_path = result_path
 }
 
+# Species List
+spplist <- read.table("~/projects/rrg-wailung/jepa/R/Data/Species/SppTaxonName.txt") %>% 
+  pull(V1) %>% 
+  unique()
 
-# Call species list
+# dbem index
 dbem_cords <- read.csv("~/projects/rrg-wailung/jepa/R/Data/dbem/Lon_Lat_DBEM.txt", header = F)
 colnames(dbem_cords) <- c("index","lon","lat")
 
-# List of files to read
-dbem_files <- list.files("~/scratch/Results/R/fishmip3af0a/", #change for testing
-                         full.names = T)
+## For parallelyzing in CC
+# Use the environment variable SLURM_CPUS_PER_TASK to set the number of cores.
+# This is for SLURM. Replace SLURM_CPUS_PER_TASK by the proper variable for your system.
+# Avoid manually setting a number of cores.
+ncores = Sys.getenv("SLURM_CPUS_PER_TASK") 
 
-# Run function
-lapply(dbem_files[1:3], #change for testing
-       aggregate_fx)
+registerDoParallel(cores=ncores)# Shows the number of Parallel Workers to be used
+print(ncores) # this how many cores are available, and how many you have requested.
+getDoParWorkers()# you can compare with the number of actual workers
+
+
+
+# ---------------- #
+# Call Routine to aggregate and save data
+# ---------------- #
+
+# Run function for one year
+aggr_data(1950,spplist)
+
+# Run function for all years
+# lapply(yrs, aggr_data, SppList)
+
+# Run in parallel
+# foreach(y=1:length(yrs)) %dopar% {aggr_data(yrs[y],spplist)}
