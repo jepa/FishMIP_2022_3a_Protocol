@@ -18,4 +18,4 @@ echo "Starting run at: `date`"
 
 module load gcc/9.3.0 r/4.0.2
 export R_LIBS=~/local/R_libs/
-Rscript conversion_settings.R Settings.R$SLURM_ARRAY_TASK_ID
+Rscript conversion_protocol.R Settings.R$SLURM_ARRAY_TASK_ID
