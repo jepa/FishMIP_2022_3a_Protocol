@@ -1,13 +1,13 @@
 # Function to aggregate data per year
 
-aggr_data <- function(yr,spplist){
+aggr_data <- function(yr,spplist,var){
   
   # for looping per species
   for(s in 1:length(spplist)){
     # for(s in 1:3){ # for testing
     
     
-    taxa_to_read <- paste0("/home/jepa/scratch/Results/fishmip3af0a/",spplist[s],"/",spplist[s],"Abd",yr,".txt")
+    taxa_to_read <- paste0("/home/jepa/scratch/Results/fishmip3af0a/",spplist[s],"/",spplist[s],var,yr,".txt")
     
     if(file.exists(taxa_to_read)){
       dbem_data <- fread(taxa_to_read)
@@ -60,7 +60,7 @@ aggr_data <- function(yr,spplist){
   } # closes spp list
   
   ## Save final data
-  tcb_data_name <- paste(result_path,"bagg_",yr,".csv",sep="")
+  tcb_data_name <- paste(result_path,"agg_",var,"_",yr,".csv",sep="")
   
   save_df <- final_df %>% 
     ungroup() %>% 
