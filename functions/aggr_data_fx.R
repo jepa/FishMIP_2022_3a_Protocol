@@ -60,7 +60,7 @@ aggr_data <- function(yr,spplist){
   } # closes spp list
   
   ## Save final data
-  tcb_data_name <- paste(result_path,"agg_",yr,".csv",sep="")
+  tcb_data_name <- paste(result_path,"bagg_",yr,".csv",sep="")
   
   save_df <- final_df %>% 
     ungroup() %>% 

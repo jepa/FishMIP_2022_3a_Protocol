@@ -3,9 +3,7 @@
 # Juliano Palacios
 library(parallel)
 
-scenarios <- c("fishmip3af0")
-
-category <- c("Abd")
+variables <- c("Abd")
 
 spplist <- read.table("~/projects/rrg-wailung/jepa/R/Data/Species/SppTaxonName.txt")
 
@@ -20,11 +18,9 @@ out_path <- "/home/jepa/scratch/Results/R/"
 # Call function
 source("~/projects/rrg-wailung/jepa/R/Scripts/dbem_txt_to_rdata.R")
 
-
 # Call function for scenarios in Settings file
-for(scen in 1: length(scenarios)){
-  mclapply(spplist$V1,
-           dbem_txt_to_rdata,
-           scenario = scenarios[scen], 
-           output_path = out_path)
-}
+lapply(variables,
+       convert_fx,
+       year_one = 1981,
+       year_end = 2010
+)
