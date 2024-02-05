@@ -1,6 +1,9 @@
 # Settings file for converting DBEM
 # .txt files to .Rdata files
 # Juliano Palacios
+
+# Load required functions
+library(here)
 library(tidyverse)
 
 variables <- c("Abd")
