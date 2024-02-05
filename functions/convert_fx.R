@@ -1,4 +1,4 @@
-convert_fx <- function(year_one = 1841,year_end = 2010,var){
+convert_fx <- function(year_one = 1841, year_end = 2010, var){
   
   # Set the path to the directory containing your CSV files
   directory_path <- "/home/jepa/scratch/Results/R/fishmip3af0a/"
