@@ -13,6 +13,8 @@ load_libs(pckgs)
 # Global Variables 
 # ---------------- #
 
+varaibles <- c("Abd")
+
 # Scenario to call (Note this will derermine the results directory)
 scen <- "fishmip3af0a"
 
@@ -65,4 +67,4 @@ getDoParWorkers()# you can compare with the number of actual workers
 # lapply(yrs, aggr_data, spplist)
 
 # Run in parallel
-foreach(y=1:length(yrs)) %dopar% {aggr_data(yrs[y],spplist)}
+foreach(y=1:length(yrs)) %dopar% {aggr_data(yrs[y],spplist,var = varaibles)}
