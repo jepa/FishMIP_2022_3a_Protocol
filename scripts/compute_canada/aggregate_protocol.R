@@ -17,7 +17,9 @@ load_libs(pckgs)
 scen <- "fishmip3af0a"
 
 # Years to load
-yrs <- c(seq(1841,1851))
+yrs <- c(seq(1841,
+             1851)
+         )
 
 # Set path to read data from
 dbem_path <- "~/scratch/Results/"
@@ -34,7 +36,7 @@ if(dir.exists(result_path)==F){
 }
 
 # Species List
-spplist <- list.files("/home/jepa/scratch/Results/fishmip3af0a/")
+spplist <- list.files(paste0("/home/jepa/scratch/Results/",scen))
 
 # dbem index
 dbem_cords <- read.csv("~/projects/rrg-wailung/jepa/R/Data/dbem/Lon_Lat_DBEM.txt", header = F)
