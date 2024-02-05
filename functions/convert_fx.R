@@ -14,8 +14,7 @@ convert_fx <- function(year_one = 1841, year_end = 2010, var){
   }
   
   # Combine data frames into a single list
-  combined_data <- bind_cols(data_list,
-                             col_names = F)
+  combined_data <- bind_cols(data_list)
   colnames(combined_data) <- seq(year_one,year_end,1)
   
   # Save the combined data as .RData
