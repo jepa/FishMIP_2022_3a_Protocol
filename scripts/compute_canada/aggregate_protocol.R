@@ -16,11 +16,11 @@ load_libs(pckgs)
 varaibles <- c("Abd")
 
 # Scenario to call (Note this will derermine the results directory)
-scen <- "fishmip3af0a"
+scen <- "fishmip3af0b"
 
 # Years to load
 yrs <- c(seq(1841,
-             1851)
+             2010)
          )
 
 # Set path to read data from
