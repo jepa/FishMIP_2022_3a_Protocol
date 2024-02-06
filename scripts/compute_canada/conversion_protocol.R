@@ -14,7 +14,7 @@ spplist <- read.table("~/projects/rrg-wailung/jepa/R/Data/Species/SppTaxonName.t
 # spplist <- dplyr::filter(spplist, V1 %in% c("603310","604708"))
 
 stryr <- 1841
-endyr <- 1851
+endyr <- 2010
 
 out_path <- "/home/jepa/scratch/Results/R/"
 

@@ -8,6 +8,8 @@
 #SBATCH -t 00-01:00:00                                                         
 #SBATCH --mail-user=j.palacios@oceans.ubc.ca                                    
 #SBATCH --mail-type=ALL                                                         
+#SBATCH --output=con_slurm-%j.out # Adding "con_" as a prefix to the output file name
+#SBATCH --output=/home/jepa/projects/rrg-wailung/jepa/FishMIP_2022_3a_Protocol/slurm_out/con_slurm-%j.out # Specify the full path with the desired file name prefix
 
 
 # ---------------------------------------------------------------------         
