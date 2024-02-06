@@ -7,7 +7,7 @@
 #SBATCH -t 00-02:00:00                                                         
 #SBATCH --mail-user=j.palacios@oceans.ubc.ca                                    
 #SBATCH --mail-type=ALL
-#SBATCH --output=/home/jepa/projects/rrg-wailung/jepa/FishMIP_2022_3a_Protocol/slurm_out/agg_slurm-%j.out # Specify the full path with the desired file name prefix
+#SBATCH --output=/home/jepa/projects/rrg-wailung/jepa/FishMIP_2022_3a_Protocol/slurm_out/agg_slurm_%j.out # Specify the full path with the desired file name prefix
 
 
 # ---------------------------------------------------------------------         

@@ -7,7 +7,7 @@ aggr_data <- function(yr,spplist,var){
     # for(s in 1:3){ # for testing
     
     
-    taxa_to_read <- paste0("/home/jepa/scratch/Results/fishmip3af0a/",spplist[s],"/",spplist[s],var,yr,".txt")
+    taxa_to_read <- paste0("/home/jepa/scratch/Results/fishmip3af0/",spplist[s],"/",spplist[s],var,yr,".txt")
     
     if(file.exists(taxa_to_read)){
       dbem_data <- fread(taxa_to_read)
