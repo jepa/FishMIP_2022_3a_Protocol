@@ -2,10 +2,10 @@
 #SBATCH --job-name=ADRD_R                                                       
 #SBATCH --account=rrg-wailung                                                   
 #SBATCH --nodes=1 # number of node MUST be 1                                    
-#SBATCH --ntasks=4                                                              
-#SBATCH --cpus-per-task=4        # number of processes                          
-#SBATCH --mem=3G                                                                
-#SBATCH -t 00-00:15:00                                                         
+#SBATCH --ntasks=1                                                              
+#SBATCH --cpus-per-task=1        # number of processes                          
+#SBATCH --mem=1G                                                                
+#SBATCH -t 00-01:00:00                                                         
 #SBATCH --mail-user=j.palacios@oceans.ubc.ca                                    
 #SBATCH --mail-type=ALL                                                         
 
