@@ -1,7 +1,7 @@
-convert_fx <- function(year_one = 1841, year_end = 2010, var){
+convert_fx <- function(year_one = 1841, year_end = 2010, scen, var){
   
   # Set the path to the directory containing your CSV files
-  directory_path <- "/home/jepa/scratch/Results/R/"
+  directory_path <- paste0("/home/jepa/scratch/Results/R/",scen,"/")
   
   # Create an empty list to store data frames
   data_list <- list()

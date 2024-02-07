@@ -19,9 +19,6 @@ endyr <- 2010
 # Scenario to call (Note this will derermine the results directory)
 scen <- "fishmip3af0"
 
-# Set a path for saving results
-out_path <- paste("~/scratch/Results/R/",scen,"/",sep = "")
-
 # Load required functions
 source(here("functions/convert_fx.R")) # Load a bunch of packages
 
@@ -29,5 +26,6 @@ source(here("functions/convert_fx.R")) # Load a bunch of packages
 lapply(variables,
        convert_fx,
        year_one = stryr,
-       year_end = endyr
+       year_end = endyr,
+       scen = scen
 )
