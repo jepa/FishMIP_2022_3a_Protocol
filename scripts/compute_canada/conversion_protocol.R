@@ -16,7 +16,11 @@ spplist <- read.table("~/projects/rrg-wailung/jepa/R/Data/Species/SppTaxonName.t
 stryr <- 1841
 endyr <- 2010
 
-out_path <- "/home/jepa/scratch/Results/R/"
+# Scenario to call (Note this will derermine the results directory)
+scen <- "fishmip3af0"
+
+# Set a path for saving results
+out_path <- paste("~/scratch/Results/R/",scen,"/",sep = "")
 
 # Load required functions
 source(here("functions/convert_fx.R")) # Load a bunch of packages
