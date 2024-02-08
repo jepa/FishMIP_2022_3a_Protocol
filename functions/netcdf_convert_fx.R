@@ -9,32 +9,33 @@
 
 # ----------------Run Function------------------- #
 
-convert_nc4 <- function(lat_lon,t0,tn,scen,data_path){
+convert_nc4 <- function(dataset, lat_lon,t0,tn,scen,var){
   
   # ---------- Step 0 ------------- #
   # Create the paths to load all data needed
   years <- seq(t0,tn,1)
-  paths <- paste(data_path,scen,"agg_",years,".txt",sep="")
   
   # ---------- Step 1 ------------- #
   # Data preparation
   # 1.1 Transform data to 1x1 grid
   
-  data <- bind_cols(coords,lapply(paths, fread)) %>% 
-    # round grids to 1 degree
-    mutate_at(vars(lon,lat),round) %>% 
+  data <- dataset %>% 
+    bind_cols(dbem_cords) %>% 
+    # # round grids to 1 degree
+    # mutate_at(vars(lon,lat),round) %>% 
     # Fix the fact that the Earth is not flat
-    mutate(
-      lat = ifelse(lat < 0, lat + 1/2, lat - 1/2),
-      lon = ifelse(lon < 0, lon + 1/2, lon - 1/2)
-    ) %>% 
-    group_by(lon,lat) %>% 
-    summarise_all(sum,na.rm=T) %>% 
+    # mutate(
+      # lat = ifelse(lat < 0, lat + 1/2, lat - 1/2),
+      # lon = ifelse(lon < 0, lon + 1/2, lon - 1/2)
+    # ) %>% 
+    # group_by(lon,lat,year) %>% 
+    # summarise_if(is.numeric,sum,na.rm=T) %>% 
     # 1.2 Transform Abd data to g C  m^2 ( gCm^2 = tons/1000000/9/m^2)
-    mutate_at(vars(-lat,-lon,-area),
-              ~.*100000/9/area) %>%
+    mutate_at(vars(-lat,-lon,-area,-index),
+              ~.*100000/9/area) %>%  
+  # mutate(value = value*100000/9/area) %>%
     ungroup() %>% 
-    dplyr::select(-area)
+    dplyr::select(lon,lat,everything(),-area,-index)
   
   # ---------- Step 2 ------------- #
   # Create the netCDF filename
@@ -43,7 +44,7 @@ convert_nc4 <- function(lat_lon,t0,tn,scen,data_path){
   # path and file name, set dname
   # <model>_<climate-forcing>_<bias-adjustment>_<climate-scenario>_<soc-scenario>_<sens-scenario>_<variable>_<global>_<time-step>_<start-year>_<end-year>.nc
   # boats_gfdl-mom6_cobalt2_none_obsclim_histsoc_default_tcb_global_monthly_1961_2010.nc
-  nc_name <- paste("dbem_gfdl-mom6_cobalt2_non",scenario,"histsoc_default_",var,"_global_annual_",t0,"-",tn,sep="")
+  nc_name <- paste("dbem_gfdl-mom6_cobalt2_non_",scenario,"_histsoc_default_",var,"_global_annual_",t0,"-",tn,sep="")
   
   complete_path <- paste(save_path,scenario,"",sep="/")
   
@@ -103,14 +104,20 @@ convert_nc4 <- function(lat_lon,t0,tn,scen,data_path){
   # ---------- Step 4 ------------- #
   # create and write the netCDF file -- ncdf4 version
   # define dimensions
+  # time_unit <- paste("Years since",t0)
   
-  time_unit <- paste("days since 1841-1-1 00:00:00")
+  if(t0 == 1841){
+    time_unit <- paste("days since 1841-1-1 00:00:00")
+  }else{
+    time_unit <- paste("days since 1901-1-1 00:00:00")
+  }
   
   
   # Create Lat, Lon, and Time data
   lon_dim <- ncdim_def("lon","degrees_east",as.double(lon)) 
   lat_dim <- ncdim_def("lat","degrees_north",as.double(lat))
-  time_dim <- ncdim_def("time",time_unit,as.double(time))
+  time_days <- time * 365.25  # Assuming a year has 365.25 days on average
+  time_dim <- ncdim_def("time",time_unit,as.double(time_days))
   
   # define variables
   long_name <- paste(scenario, "for", var, "using DBEM-GFDL-COBALT2")
@@ -134,8 +141,8 @@ convert_nc4 <- function(lat_lon,t0,tn,scen,data_path){
   ncatt_put(n_cout,0,"Title",long_name)
   ncatt_put(n_cout,0,"Model","DBEM")
   ncatt_put(n_cout,0,"Institution","University of British Columbia, Changing Ocean Research Unit")
-  ncatt_put(n_cout,0,"Authors","William W.L. Cheung, Juliano Palacios-Abrantes & Isabella Morgante")
-  ncatt_put(n_cout,0,"Date",Sys.Date())
+  ncatt_put(n_cout,0,"Authors","William W.L. Cheung, Juliano Palacios Abrantes & Isabella Morgante")
+  ncatt_put(n_cout,0,"Date",paste(Sys.Date()))
   ncatt_put(n_cout,0,"Forcing","gfdl-mom6_cobalt2")
   ncatt_put(n_cout,0,"Bias correction","nobc")
   

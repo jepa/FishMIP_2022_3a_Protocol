@@ -1,31 +1,24 @@
 
+source("./functions/load_libs_fx.R")
+source("./functions/netcdf_convert_fx.R")
 # Read libraries
 load_libs(c("ncdf4","tidyverse","data.table")) # load these packages
 
 
 #-----------CONTROL PANNEL -------- #
-
-start_time <- 1841 # Start of time set
-end_time <- 2010 # end of time set
-scenario <- "historical" # Note, use the following notation to match protocol: "pre-industrial","historical","rcp85", npp-control’ or ‘temperature-control’
+scenario <- "obsclim" # Note, use the following notation to match protocol: "pre-industrial","historical","rcp85", npp-control’ or ‘temperature-control’
 sizes <-  "tcb" #c("b10cm","b30cm","tcb")
 
-# Path to the aggregated data (inclide name untill size and year)
-# NOTE: Make sure you jave both sizes in one directory so it processes both
-# data_path <- "/Volumes/HALL2000/Data/FishMipCESM/Results/AggregatedData/CESMhist/dbem_cesm1-bcg_hist_"
-# data_path <- "/Volumes/HALL2000/Data/FishMipCESM/Results/AggregatedData/CESMnpp/dbem_cesm1-bcg_npp_"
-
 # Set the original data path (the one to be converted)
-data_path <- "~/scratch/Results/R/fishmip3af0a"
+load("/Users/jepa88/Library/CloudStorage/OneDrive-UBC/Data/FishMIP_2022_3a_Protocol/Results/Abd_data.RData")
+
 
 # Path where you want data to be saved 
-# NOTE: it will create a directory with the scenario name
-save_path <- "~/scratch/Results/netcdf/fishmip3af0a"
+save_path <- "/Users/jepa88/Library/CloudStorage/OneDrive-UBC/Data/FishMIP_2022_3a_Protocol/Results"
 
 # Load coordinate grid
-# dbem index
-dbem_cords <- read.csv("~/projects/rrg-wailung/jepa/R/Data/dbem/Lon_Lat_DBEM.txt", header = F)
-colnames(dbem_cords) <- c("index","lon","lat")
+dbem_cords <- MyFunctions::my_data("dbem_coords")
+
 
 
 # 1.2 Estimate gridcell area based on global variables (m^2)
@@ -45,13 +38,25 @@ dbem_cords <- dbem_cords %>%
 
 # Call routine for both sizes (sizes variable)
 
-convert_nc4(
-       lat_lon = dbem_cords,
-       data_path = data_path,
-       t0 = start_time,
-       tn = end_time,
-       scen = scenario
-       )
+
+start_time <- c(1841,1961) # Start of time set
+end_time <- c(1960,2010) # end of time set
+
+for(i in 1:2){
+  
+  print(start_time[i])
+  print(end_time[i])
+  
+  convert_nc4(
+    dataset = combined_data,
+    lat_lon = dbem_cords,
+    t0 = start_time[i],
+    tn = end_time[i],
+    scen = scenario,
+    var = sizes
+  )
+  
+}
 
 ## ------------------- ##
 #  END ROUTINE 
@@ -59,36 +64,38 @@ convert_nc4(
 
 
 # ---------------- TESTING FUNCTION RESULT -------------- #
-library(lattice)
-library(RColorBrewer)
-# Test file
 
-ncin <- nc_open(paste(save_path,"/",scenario,"/dbem_cesm1-bgc_nobc_",scenario,"_nosoc_co2_tcb_global_annual_1860-2005.nc",sep=""))
-# 
-# # get longitude and latitude
-lon <- ncvar_get(ncin,"lon")
-nlon <- dim(lon)
-# 
-# # get lat
-lat <- ncvar_get(ncin,"lat")
-nlat <- dim(lat)
-# 
-# # get time
-time <- ncvar_get(ncin,"time")
-time
-# 
-y <- 30
-test_data <- ncvar_get(ncin,"tcb")
-ncin_slice <- test_data[,,y]
-# 
-# # Print map
-image(lon,lat,log10(ncin_slice), col=rev(brewer.pal(10,"RdBu")))
 
-# Print log10 scale version
-grid <- expand.grid(lon=lon, lat=lat)
-# cutpts <- c(-0.1,seq(0,1,0.1))
-cutpts <- seq(-1,-5,-1)
 
-levelplot(log10(ncin_slice) ~ lon * lat, data=grid, at=cutpts, cuts=10, pretty=T, 
-          col.regions=(rev(brewer.pal(10,"RdBu"))))
+ncd_df <- metR::ReadNetCDF(paste0(save_path,"/obsclim/","dbem_gfdl-mom6_cobalt2_non_obsclim_histsoc_default_tcb_global_annual_1841-2010.nc"))
+ncd_df
 
+
+ncd_df %>% 
+  # mutate(year = year(time)) %>% 
+  # filter(time == 1)
+  group_by(time) %>% 
+  summarise(
+    mean_tcb = mean(tcb,na.rm = T)
+  ) %>% 
+  ggplot() +
+  geom_line(
+    aes(
+      x = time,
+      y = mean_tcb
+    )
+  )
+
+ncd_df %>% 
+  mutate(year = year(time)) %>% 
+  filter(year %in% c(1841,1951,2010)) %>% 
+  ggplot() +
+  geom_tile(
+    aes(
+      x = lon,
+      y = lat,
+      fill = log10(tcb)
+    )
+  ) +
+    facet_wrap(~year) +
+  scale_fill_viridis_b()
