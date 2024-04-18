@@ -18,7 +18,7 @@ convert_fx <- function(year_one = 1841, year_end = 2010, scen, var){
   colnames(combined_data) <- seq(year_one,year_end,1)
   
   # Save the combined data as .RData
-  save(combined_data, file = paste0("/home/jepa/scratch/Results/R/fishmip3af0/",var,"_data.RData"))
+  save(combined_data, file = paste0("/home/jepa/projects/def-wailung/CMIP6/DBEM_outputs/FishMIP_outputs/Rdata/",sen,"/",var,"_data.RData"))
   
   # Remove individual data frames if desired
   rm(data_list)
