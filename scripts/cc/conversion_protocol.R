@@ -8,7 +8,7 @@ library(tidyverse)
 
 variables <- c("Abd")
 
-spplist <- read.table("~/projects/rrg-wailung/jepa/R/Data/Species/SppTaxonName.txt")
+spplist <- list.files("~/projects/def-wailung/CMIP6/DBEM_outputs/FishMIP_outputs/No_Fishing/")
 
 # Partial fix for not working species
 # spplist <- dplyr::filter(spplist, V1 %in% c("603310","604708"))
@@ -16,8 +16,8 @@ spplist <- read.table("~/projects/rrg-wailung/jepa/R/Data/Species/SppTaxonName.t
 stryr <- 1841
 endyr <- 2010
 
-# Scenario to call (Note this will derermine the results directory)
-scen <- "fishmip3af0"
+# Scenario to call (Note this will determine the results directory)
+scen <- "No_fishing"
 
 # Load required functions
 source(here("functions/convert_fx.R")) # Load a bunch of packages
