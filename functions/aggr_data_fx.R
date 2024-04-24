@@ -1,13 +1,13 @@
 # Function to aggregate data per year
 
-aggr_data <- function(yr,spplist,var){
+aggr_data <- function(yr,spplist,scen,var){
   
   # for looping per species
   for(s in 1:length(spplist)){
     # for(s in 1:3){ # for testing
     
     
-    taxa_to_read <- paste0("/home/jepa/scratch/Results/fishmip3af0/",spplist[s],"/",spplist[s],var,yr,".txt")
+    taxa_to_read <- paste0(dbem_path,scen,"/",spplist[s],"/",spplist[s],var,yr,".txt")
     
     if(file.exists(taxa_to_read)){
       dbem_data <- fread(taxa_to_read)
@@ -15,13 +15,15 @@ aggr_data <- function(yr,spplist,var){
       
       
       partial_df <- dbem_cords %>% 
-        full_join(dbem_data,
+        left_join(dbem_data,
                   by = "index") %>% 
         select(index,value) %>% 
         mutate(value = ifelse(is.na(value),0,value))
       
-      
-      
+      # head(partial_df)
+      # length(partial_df)
+      # nrow(partial_df)
+      # sum(partial_df$value,na.rm = T)
       if(nrow(partial_df)==0){
         
         next()
@@ -42,6 +44,16 @@ aggr_data <- function(yr,spplist,var){
                                 by = "index") %>% 
             mutate(total = total+value) %>% 
             select(index,total)
+          
+          if(s %in% c(10,50,100,250,500)){
+            
+            print(paste(yr,sum(final_df$total,na.rm = T)))
+          }
+          
+          # head(final_df)
+          # length(final_df)
+          # nrow(final_df)
+          # sum(final_df$total,na.rm = T)
           
         } # Closes else from aggregation
         

@@ -6,7 +6,7 @@ source(here("functions/load_libs_fx.R")) # Load a bunch of packages
 source(here("functions/aggr_data_fx.R")) # Aggregstes data for FishMip
 
 # Load packages
-pckgs <- c("tidyverse","data.table","dbemImport","foreach","doParallel")
+pckgs <- c("tidyverse","data.table","foreach","doParallel")
 load_libs(pckgs)
 
 # ---------------- #
@@ -16,7 +16,7 @@ load_libs(pckgs)
 varaibles <- c("Abd")
 
 # Scenario to call (Note this will derermine the results directory)
-scen <- "fishmip3af0"
+scen <- "No_fishing"
 
 # Years to load
 yrs <- c(seq(1841,
@@ -24,11 +24,10 @@ yrs <- c(seq(1841,
          )
 
 # Set path to read data from
-dbem_path <- "~/scratch/Results/"
-# DBEM_Path <- "/Volumes/HALL2000/Data/FishMipMPA/Results" # For testing
+dbem_path <- "~/projects/def-wailung/CMIP6/DBEM_outputs/FishMIP_outputs/"
 
 # Set a path for saving results
-result_path <- paste("~/scratch/Results/R/",scen,"/",sep = "")
+result_path <- paste("~/projects/def-wailung/CMIP6/DBEM_outputs/FishMIP_outputs/Rdata/",scen,"/",sep = "")
 # Result_Path <- "./Data" # For testing
 
 if(dir.exists(result_path)==F){
@@ -38,10 +37,10 @@ if(dir.exists(result_path)==F){
 }
 
 # Species List
-spplist <- list.files(paste0("/home/jepa/scratch/Results/",scen))
+spplist <- list.files(paste0("~/projects/def-wailung/CMIP6/DBEM_outputs/FishMIP_outputs/",scen))
 
 # dbem index
-dbem_cords <- read.csv("~/projects/rrg-wailung/jepa/R/Data/dbem/Lon_Lat_DBEM.txt", header = F)
+dbem_cords <- read.csv("~/projects/def-wailung/jepa/data/spatial/Lon_Lat_DBEM.txt", header = F)
 colnames(dbem_cords) <- c("index","lon","lat")
 
 ## For parallelyzing in CC
@@ -64,7 +63,10 @@ getDoParWorkers()# you can compare with the number of actual workers
 # aggr_data(1950,spplist)
 
 # Run function for all years
-# lapply(yrs, aggr_data, spplist)
+lapply(yrs, aggr_data, 
+       spplist = spplist,
+       var = varaibles,
+       scen = scen)
 
 # Run in parallel
 foreach(y=1:length(yrs)) %dopar% {aggr_data(yrs[y],spplist,var = varaibles)}
