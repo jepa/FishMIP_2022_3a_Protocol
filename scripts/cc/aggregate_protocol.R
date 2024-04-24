@@ -63,10 +63,10 @@ getDoParWorkers()# you can compare with the number of actual workers
 # aggr_data(1950,spplist)
 
 # Run function for all years
-lapply(yrs, aggr_data, 
-       spplist = spplist,
-       var = varaibles,
-       scen = scen)
+# lapply(yrs, aggr_data, 
+#        spplist = spplist,
+#        var = varaibles,
+#        scen = scen)
 
 # Run in parallel
 foreach(y=1:length(yrs)) %dopar% {aggr_data(yrs[y],spplist,var = varaibles)}
