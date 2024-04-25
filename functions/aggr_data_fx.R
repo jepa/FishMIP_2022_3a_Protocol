@@ -8,11 +8,11 @@ aggr_data <- function(yr,spplist,scen,var){
     
     
     taxa_to_read <- paste0(dbem_path,scen,"/",spplist[s],"/",spplist[s],var,yr,".txt")
-    print(taxa_to_read)
-    if(file.exists(taxa_to_read)){
+    # print(taxa_to_read)
+    if(file.exists(taxa_to_read) && file.size(taxa_to_read) >0){
+      
       dbem_data <- fread(taxa_to_read)
       colnames(dbem_data) <- c("index","value")
-      
       
       partial_df <- dbem_cords %>% 
         left_join(dbem_data,
