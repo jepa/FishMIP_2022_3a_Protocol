@@ -8,7 +8,7 @@ aggr_data <- function(yr,spplist,scen,var){
     
     
     taxa_to_read <- paste0(dbem_path,scen,"/",spplist[s],"/",spplist[s],var,yr,".txt")
-    
+    print(taxa_to_read)
     if(file.exists(taxa_to_read)){
       dbem_data <- fread(taxa_to_read)
       colnames(dbem_data) <- c("index","value")
@@ -47,7 +47,7 @@ aggr_data <- function(yr,spplist,scen,var){
           
           if(s %in% c(10,50,100,250,500)){
             
-            print(paste(yr,sum(final_df$total,na.rm = T)))
+            # print(paste(yr,sum(final_df$total,na.rm = T)))
           }
           
           # head(final_df)
