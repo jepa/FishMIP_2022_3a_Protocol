@@ -15,6 +15,6 @@ echo "Current working directory: `pwd`"
 echo "Starting run at: `date`"
 # ---------------------------------------------------------------------         
 
-module load StdEnv/2023 gcc/12.3.0 r/4.3.1
+module load StdEnv/2023 gcc/12.3 r/4.3.1
 export R_LIBS=~/local/R_libs/
 Rscript aggregate_protocol.R Settings.R$SLURM_ARRAY_TASK_ID
