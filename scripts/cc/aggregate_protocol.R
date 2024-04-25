@@ -13,7 +13,7 @@ load_libs(pckgs)
 # Global Variables 
 # ---------------- #
 
-varaibles <- c("Abd")
+varaibles <- c("Catch")
 
 # Scenario to call (Note this will derermine the results directory)
 scen <- "Fishing"
