@@ -3,7 +3,7 @@
 #SBATCH --account=def-wailung                                                   
 #SBATCH --nodes=1 # number of node MUST be 1                                    
 #SBATCH --cpus-per-task=4        # number of processes                          
-#SBATCH --mem-per-cpu=2G                                                                
+#SBATCH --mem-per-cpu=1G                                                                
 #SBATCH -t 00-05:00:00                                                         
 #SBATCH --mail-user=j.palacios@oceans.ubc.ca                                    
 #SBATCH --mail-type=ALL
