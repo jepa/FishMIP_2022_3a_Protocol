@@ -16,7 +16,7 @@ load_libs(pckgs)
 varaibles <- c("Abd")
 
 # Scenario to call (Note this will derermine the results directory)
-scen <- "No_fishing"
+scen <- "Fishing"
 
 # Years to load
 yrs <- c(seq(1841,
