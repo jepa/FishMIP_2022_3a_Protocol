@@ -1,6 +1,6 @@
 #!/bin/bash                                                                     
 #SBATCH --job-name=ADRD_R                                                       
-#SBATCH --account=rrg-wailung                                                   
+#SBATCH --account=def-wailung                                                   
 #SBATCH --nodes=1 # number of node MUST be 1                                    
 #SBATCH --ntasks=1                                                              
 #SBATCH --cpus-per-task=1        # number of processes                          
