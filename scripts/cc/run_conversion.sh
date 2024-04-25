@@ -8,7 +8,7 @@
 #SBATCH -t 00-00:20:00                                                         
 #SBATCH --mail-user=j.palacios@oceans.ubc.ca                                    
 #SBATCH --mail-type=ALL                                                         
-#SBATCH --output=/home/jepa/projects/rrg-wailung/jepa/FishMIP_2022_3a_Protocol/slurm_out/con_slurm_%j.out # Specify the full path with the desired file name prefix
+#SBATCH --output=/home/jepa/projects/def-wailung/jepa/FishMIP_2022_3a_Protocol/slurm_out/con_slurm_%j.out # Specify the full path with the desired file name prefix
 
 
 # ---------------------------------------------------------------------         
@@ -17,6 +17,6 @@ echo "Starting run at: `date`"
 # ---------------------------------------------------------------------         
 
 
-module load gcc/9.3.0 r/4.0.2
+module load StdEnv/2023 gcc/12.3 r/4.3.1
 export R_LIBS=~/local/R_libs/
 Rscript conversion_protocol.R Settings.R$SLURM_ARRAY_TASK_ID
