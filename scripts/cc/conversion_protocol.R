@@ -8,8 +8,6 @@ library(tidyverse)
 
 variables <- c("Abd")
 
-spplist <- list.files("~/projects/def-wailung/CMIP6/DBEM_outputs/FishMIP_outputs/No_fishing/")
-
 # Partial fix for not working species
 # spplist <- dplyr::filter(spplist, V1 %in% c("603310","604708"))
 
@@ -18,6 +16,8 @@ endyr <- 2010
 
 # Scenario to call (Note this will determine the results directory)
 scen <- "No_fishing"
+
+spplist <- list.files(paste0("~/projects/def-wailung/CMIP6/DBEM_outputs/FishMIP_outputs/",scen))
 
 # Load required functions
 source(here("functions/convert_fx.R")) # Load a bunch of packages

@@ -1,7 +1,7 @@
 convert_fx <- function(year_one = 1841, year_end = 2010, scen, var){
   
   # Set the path to the directory containing your CSV files
-  directory_path <- paste0("~/projects/def-wailung/CMIP6/DBEM_outputs/FishMIP_outputs/",scen,"/")
+  directory_path <- paste0("~/projects/def-wailung/CMIP6/DBEM_outputs/FishMIP_outputs/agg_data/",scen,"/")
   
   # Create an empty list to store data frames
   data_list <- list()
@@ -18,12 +18,12 @@ convert_fx <- function(year_one = 1841, year_end = 2010, scen, var){
   colnames(combined_data) <- seq(year_one,year_end,1)
   
   # Save the combined data as .RData
-  save(combined_data, file = paste0("~/projects/def-wailung/CMIP6/DBEM_outputs/FishMIP_outputs/Rdata/",sen,"/",var,"_data.RData"))
+  save(combined_data, file = paste0("~/projects/def-wailung/CMIP6/DBEM_outputs/FishMIP_outputs/agg_data/Rdata/",sen,"_",var,"_data.RData"))
   
   # Remove individual data frames if desired
   rm(data_list)
   
   #Return message
-  return_message <- paste("Finish converting",var,"from",year_one,"to",year_end)
+  return_message <- paste("Finish converting",var,sen,"from",year_one,"to",year_end)
   return(return_message)
 }
