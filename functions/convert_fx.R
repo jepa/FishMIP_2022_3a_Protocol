@@ -24,6 +24,6 @@ convert_fx <- function(year_one = 1841, year_end = 2010, scen, var){
   rm(data_list)
   
   #Return message
-  return_message <- paste("Finish converting",var,sen,"from",year_one,"to",year_end)
+  return_message <- paste("Finish converting",var,scen,"from",year_one,"to",year_end)
   return(return_message)
 }
