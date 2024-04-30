@@ -9,7 +9,7 @@
 
 # ----------------Run Function------------------- #
 
-convert_nc4 <- function(dataset, lat_lon,t0,tn,scen,var){
+convert_nc4 <- function(dataset, lat_lon,t0,tn,scen_clim,scen_soc,var){
   
   # ---------- Step 0 ------------- #
   # Create the paths to load all data needed
@@ -44,7 +44,7 @@ convert_nc4 <- function(dataset, lat_lon,t0,tn,scen,var){
   # path and file name, set dname
   # <model>_<climate-forcing>_<bias-adjustment>_<climate-scenario>_<soc-scenario>_<sens-scenario>_<variable>_<global>_<time-step>_<start-year>_<end-year>.nc
   # boats_gfdl-mom6_cobalt2_none_obsclim_histsoc_default_tcb_global_monthly_1961_2010.nc
-  nc_name <- paste("dbem_gfdl-mom6_cobalt2_non_",scenario,"_histsoc_default_",var,"_global_annual_",t0,"-",tn,sep="")
+  nc_name <- paste("dbem_gfdl-mom6_cobalt2_non_",scen_clim,"_",scen_soc,"_60arcmin_",var,"_global_annual_",t0,"-",tn,sep="")
   
   complete_path <- paste(save_path,scenario,"",sep="/")
   
@@ -53,6 +53,8 @@ convert_nc4 <- function(dataset, lat_lon,t0,tn,scen,var){
   }
   
   nc_fname <- paste(complete_path, nc_name, ".nc", sep="")
+  
+  
   
   # ---------- Step 3 ------------- #
   # Convert data to 3d array
@@ -108,15 +110,17 @@ convert_nc4 <- function(dataset, lat_lon,t0,tn,scen,var){
   
   if(t0 == 1841){
     time_unit <- paste("days since 1841-1-1 00:00:00")
+    n_days <- 0
   }else{
     time_unit <- paste("days since 1901-1-1 00:00:00")
+    n_days <- 21915
   }
   
   
   # Create Lat, Lon, and Time data
   lon_dim <- ncdim_def("lon","degrees_east",as.double(lon)) 
   lat_dim <- ncdim_def("lat","degrees_north",as.double(lat))
-  time_days <- time * 365.25  # Assuming a year has 365.25 days on average
+  time_days <- n_days+time * 365.25  # Assuming a year has 365.25 days on average
   time_dim <- ncdim_def("time",time_unit,as.double(time_days))
   
   # define variables
@@ -152,7 +156,11 @@ convert_nc4 <- function(dataset, lat_lon,t0,tn,scen,var){
     ncatt_put(n_cout,0,"Scenario",scenario)
   }
   
+  if(soc_scen == "nat"){
   ncatt_put(n_cout,0,"Human impact","non")
+  }else{
+    ncatt_put(n_cout,0,"Human impact","fishing")
+  }
   ncatt_put(n_cout,0,"Default CO2 scenario","co2")
   ncatt_put(n_cout,0,"Variable name",var)
   ncatt_put(n_cout,0,"Region","Global")
