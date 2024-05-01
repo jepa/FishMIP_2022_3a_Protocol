@@ -31,8 +31,8 @@ convert_nc4 <- function(dataset, lat_lon,t0,tn,scen_clim,scen_soc,var){
     # group_by(lon,lat,year) %>% 
     # summarise_if(is.numeric,sum,na.rm=T) %>% 
     # 1.2 Transform Abd data to g C  m^2 ( gCm^2 = tons/1000000/9/m^2)
-    mutate_at(vars(-lat,-lon,-area,-index),
-              ~.*100000/9/area) %>%  
+    # mutate_at(vars(-lat,-lon,-area,-index),
+              # ~.*100000/9/area) %>%  
   # mutate(value = value*100000/9/area) %>%
     ungroup() %>% 
     dplyr::select(lon,lat,everything(),-area,-index)
@@ -46,7 +46,7 @@ convert_nc4 <- function(dataset, lat_lon,t0,tn,scen_clim,scen_soc,var){
   # boats_gfdl-mom6_cobalt2_none_obsclim_histsoc_default_tcb_global_monthly_1961_2010.nc
   nc_name <- paste("dbem_gfdl-mom6_cobalt2_non_",scen_clim,"_",scen_soc,"_60arcmin_",var,"_global_annual_",t0,"-",tn,sep="")
   
-  complete_path <- paste(save_path,scenario,"",sep="/")
+  complete_path <- paste(save_path,scen_clim,scen_soc,"",sep="/")
   
   if(dir.exists(complete_path) == F){
     dir.create(complete_path)
@@ -124,8 +124,9 @@ convert_nc4 <- function(dataset, lat_lon,t0,tn,scen_clim,scen_soc,var){
   time_dim <- ncdim_def("time",time_unit,as.double(time_days))
   
   # define variables
-  long_name <- paste(scenario, "for", var, "using DBEM-GFDL-COBALT2")
-  main_def <- ncvar_def(var, "g Cm^-2",list(lon_dim,lat_dim,time_dim),fill_value,long_name,prec="single")
+  long_name <- paste(scen_soc, "for", var, "using DBEM-GFDL-COBALT2")
+  # main_def <- ncvar_def(var, "g Cm^-2",list(lon_dim,lat_dim,time_dim),fill_value,long_name,prec="single")
+  main_def <- ncvar_def(var, "g m^-2",list(lon_dim,lat_dim,time_dim),fill_value,long_name,prec="single")
   
   # create netCDF file
   n_cout <- nc_create(nc_fname,list(main_def),force_v4=TRUE)
@@ -150,13 +151,13 @@ convert_nc4 <- function(dataset, lat_lon,t0,tn,scen_clim,scen_soc,var){
   ncatt_put(n_cout,0,"Forcing","gfdl-mom6_cobalt2")
   ncatt_put(n_cout,0,"Bias correction","nobc")
   
-  if(scenario %in% c("pre-industrial","historical","rcp85")){
-    ncatt_put(n_cout,0,"Climate Scenario",scenario)
+  if(scen_soc %in% c("pre-industrial","historical","rcp85")){
+    ncatt_put(n_cout,0,"Climate Scenario",scen_soc)
   }else{
-    ncatt_put(n_cout,0,"Scenario",scenario)
+    ncatt_put(n_cout,0,"Scenario",scen_soc)
   }
   
-  if(soc_scen == "nat"){
+  if(scen_soc == "nat"){
   ncatt_put(n_cout,0,"Human impact","non")
   }else{
     ncatt_put(n_cout,0,"Human impact","fishing")

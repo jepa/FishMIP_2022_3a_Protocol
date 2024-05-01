@@ -43,15 +43,26 @@ dbem_cords <- dbem_cords %>%
   )
 
 
-
 climate_scen <- "obsclim" # Note, use the following notation to match protocol: "pre-industrial","historical","rcp85", npp-control’ or ‘temperature-control’
 sizes <-  "tc" # abundance tcb or catch tc
 socioecon_scen <- "histsoc" # Note, use nat for no fishing and histsoc for fishing
 
 # Set the original data path (the one to be converted)
 rm(combined_data)
-load("/Users/jepa88/Library/CloudStorage/OneDrive-UBC/Data/FishMIP_2022_3a_Protocol/Results/Rdata/Fishing_Catch_data.RData")
 
+if(socioecon_scen == "nat"){
+  load("/Users/jepa88/Library/CloudStorage/OneDrive-UBC/Data/FishMIP_2022_3a_Protocol/Results/Rdata/No_Fishing_Abd_data.RData")
+  sizes <-  "tcb" # abundance tcb or catch tc
+  print("nat")
+}else{
+  if(sizes == "tcb"){
+    load("/Users/jepa88/Library/CloudStorage/OneDrive-UBC/Data/FishMIP_2022_3a_Protocol/Results/Rdata/Fishing_Abd_data.RData")
+    print("tcb")
+  }else{
+    load("/Users/jepa88/Library/CloudStorage/OneDrive-UBC/Data/FishMIP_2022_3a_Protocol/Results/Rdata/Fishing_Catch_data.RData")
+    print("mcp")
+  }
+}
 
 # Call routine for both sizes (sizes variable)
 
@@ -80,39 +91,58 @@ for(i in 1:2){
 ## ------------------- ##
 
 
+
 # ---------------- TESTING FUNCTION RESULT -------------- #
 
 netcdf_files <- list.files(paste0(save_path,"/obsclim/"), full.names = F, pattern = ".nc")
 
+# Explore data
+
+# nc <- nc_open(list.files(paste0(save_path,"/obsclim/"), full.names = T, pattern = ".nc")[5])
+# nc
+
+
+# Create plots
+
 for(i in 1:length(netcdf_files)){
   ncd_df <- metR::ReadNetCDF(paste0(save_path,"/obsclim/",netcdf_files[i]))
-  ncd_df
+  # ncd_df
   
+  # total_sum <-ncd_df %>% 
+  #   select(1:3,"value" = 4) %>% 
+  #   group_by(time) %>% 
+  #   summarise(
+  #     sum_value = sum(value,na.rm = T)
+  #   ) %>% 
+  #   group_by() %>% 
+  #   summarise(sum(sum_value))
   
-  ncd_df %>% 
-      select(1:3,"value" = 4) %>% 
-    group_by(time) %>% 
+  # print(total_sum)
+  ncd_df %>%
+      select(1:3,"value" = 4) %>%
+    group_by(time) %>%
     summarise(
-      mean_value = mean(value,na.rm = T)
-    ) %>% 
-    ggplot() +
+      sum_value = sum(value,na.rm = T)
+    ) %>%
+  ggplot() +
     geom_line(
       aes(
         x = time,
-        y = mean_value
+        y = sum_value
       )
     )
-  
-  
+
+
   ggsave(filename = paste0(save_path,"/obsclim/figures/",netcdf_files[i],"_line_plot.png"),
-         plot = last_plot()
+         plot = last_plot(),
+         width = 10
   )
-  
-  
-  ncd_df %>% 
-    select(1:3,"value" = 4) %>% 
-    mutate(year = year(time)) %>% 
-    filter(year %in% c(start_time,end_time)) %>% 
+
+
+  ncd_df %>%
+    select(1:3,"value" = 4) %>%
+    mutate(year = year(time)) %>%
+    filter(year %in% c(start_time,end_time)) %>%
     ggplot() +
     geom_tile(
       aes(
@@ -125,10 +155,14 @@ for(i in 1:length(netcdf_files)){
     facet_wrap(~year) +
     scale_fill_viridis_b() +
     scale_color_viridis_b()
-  
-  ggsave(filename = paste0(save_path,"/obsclim/",netcdf_files[i],"_map_plot.png"),
+
+  ggsave(filename = paste0(save_path,"/obsclim/figures/",netcdf_files[i],"_map_plot.png"),
          plot = last_plot(),
          width = 10
   )
   
 }
+
+
+
+
