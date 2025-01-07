@@ -1,0 +1,74 @@
+---
+title: "Untitled"
+author: "Juliano Palacios Abrantes"
+date: "2024-05-01"
+output: html_document
+---
+
+# Histoc runs (Fishing)
+
+## Upload Spin-up Period
+
+The output files covering the spin-up period (1841-1960) can be saved on DKRZ here:
+
+/work/bb0820/ISIMIP/ISIMIP3a/UploadArea/marine-fishery_global/model_name/temp2
+
+NOTE> The Path does not allow me to save anything so I saved in in the following sub directory: 
+
+`b381132@levante.dkrz.de:/work/bb0820/ISIMIP/ISIMIP3a/UploadArea/marine-fishery_global/DBEM/_tmp2/gfdl-mom6-cobalt2/historical/`
+
+```{bash}
+
+cd
+
+cd Data/Data/FishMIP_2022_3a_Protocol/Results/obsclim/
+
+scp dbem_gfdl-mom6_cobalt2_non_obsclim_histsoc_60arcmin_tc_global_annual_1841* b381132@levante.dkrz.de:/work/bb0820/ISIMIP/ISIMIP3a/UploadArea/marine-fishery_global/DBEM/_tmp2/gfdl-mom6-cobalt2/historical/
+
+scp dbem_gfdl-mom6_cobalt2_non_obsclim_histsoc_60arcmin_tcb_global_annual_1841* b381132@levante.dkrz.de:/work/bb0820/ISIMIP/ISIMIP3a/UploadArea/marine-fishery_global/DBEM/_tmp2/gfdl-mom6-cobalt2/historical/
+```
+
+## Upload Experiment
+
+The output files covering the experiment period (1961-2010) can be saved on DKRZ here:
+
+/work/bb0820/ISIMIP/ISIMIP3a/UploadArea/marine-fishery_global/model_name/temp
+
+Note same as before
+
+```{bash}
+
+cd
+
+cd Data/Data/FishMIP_2022_3a_Protocol/Results/obsclim/
+
+scp dbem_gfdl-mom6_cobalt2_non_obsclim_histsoc_60arcmin_tcb_global_annual_1961* b381132@levante.dkrz.de:/work/bb0820/ISIMIP/ISIMIP3a/UploadArea/marine-fishery_global/DBEM/_tmp/gfdl-mom6-cobalt2/historical/
+```
+
+# Natural runs (No-Fishing)
+
+There is no sub-folder for `nat` runs... 
+
+## Upload Spin-up Period
+
+```{bash}
+
+cd
+
+cd Data/Data/FishMIP_2022_3a_Protocol/Results/obsclim/
+
+scp dbem_gfdl-mom6_cobalt2_non_obsclim_nat_60arcmin_tcb_global_annual_1841-1960.nc b381132@levante.dkrz.de:/work/bb0820/ISIMIP/ISIMIP3a/UploadArea/marine-fishery_global/DBEM/_tmp2/gfdl-mom6-cobalt2/historical/
+```
+
+## Upload Experiment
+
+
+```{bash}
+
+cd
+
+cd Data/Data/FishMIP_2022_3a_Protocol/Results/obsclim/
+
+scp dbem_gfdl-mom6_cobalt2_non_obsclim_nat_60arcmin_tcb_global_annual_1961-2010.nc b381132@levante.dkrz.de:/work/bb0820/ISIMIP/ISIMIP3a/UploadArea/marine-fishery_global/DBEM/_tmp/gfdl-mom6-cobalt2/historical/
+
+```
