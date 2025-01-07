@@ -1,0 +1,26 @@
+Current working directory: /home/jepa/projects/def-wailung/jepa/FishMIP_2022_3a_Protocol/scripts/cc
+Starting run at: Thu 25 Apr 2024 04:39:05 PM PDT
+here() starts at /project/6006523/jepa/FishMIP_2022_3a_Protocol
+── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.4     ✔ readr     2.1.5
+✔ forcats   1.0.0     ✔ stringr   1.5.1
+✔ ggplot2   3.5.1     ✔ tibble    3.2.1
+✔ lubridate 1.9.3     ✔ tidyr     1.3.1
+✔ purrr     1.0.2     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+Error in `bind_cols()`:
+! Can't recycle `..1` (size 518400) to match `..3` (size 259200).
+Backtrace:
+    ▆
+ 1. ├─base::lapply(...)
+ 2. │ └─global FUN(X[[i]], ...)
+ 3. │   └─dplyr::bind_cols(data_list)
+ 4. │     └─vctrs::vec_cbind(!!!dots, .name_repair = .name_repair, .error_call = current_env())
+ 5. └─vctrs::stop_incompatible_size(...)
+ 6.   └─vctrs:::stop_incompatible(...)
+ 7.     └─vctrs:::stop_vctrs(...)
+ 8.       └─rlang::abort(message, class = c(class, "vctrs_error"), ..., call = call)
+Execution halted
